@@ -27,6 +27,7 @@ class Game:
         if self.online:
             self.game_websocket.run()
         self.screen = pygame.display.set_mode((500, 500))
+        self.players: list = []
         # win = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
     def reset_world(self):

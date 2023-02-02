@@ -9,7 +9,7 @@ from core.game import Game
 
 class Mob(Entity):
     def __init__(self, x, y, world, facing=Facing.SOUTH):
-        super().__init__(x, y, sprites_path=r"./resources/sprites/palkia_test", facing=facing, world=world)
+        super().__init__(x, y, sprites_path=r"./resources/sprites/palkia_test", facing=facing, world=world, health=100)
         self.speed = 3
         self.i = 0
         self.max_i = 15

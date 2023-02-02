@@ -6,9 +6,9 @@ from entities.Entity import Entity
 from core.world import Facing, World
 
 
-class Player(Entity):
+class PlayerEntity(Entity):
     def __init__(self, x, y, world: World, facing=Facing.SOUTH):
-        super().__init__(x, y, sprites_path=os.path.join(r"./resources/sprites/dialga_test"), facing=facing, world=world)
+        super().__init__(x, y, sprites_path=os.path.join(r"./resources/sprites/dialga_test"), facing=facing, world=world, health=100)
         world.entities.append(self)
         self.speed = 3
         self.i = 0
