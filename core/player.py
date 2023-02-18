@@ -4,26 +4,36 @@ from entities.livingentities.entity_player import PlayerEntity
 
 
 class Player:
-    def __init__(self, controllers, world):
-        self.entity = PlayerEntity(200, 200, world)
-        self.controllers = controllers
+    def __init__(self, controller, world):
+        self.entity = PlayerEntity(0, 0, world)
+        self.controller = controller
         self.keys = []
-        self.u_events = []
-        self.d_events = []
+        self.events = []
+        self.inventory = {}  # key: item, value: count
 
     def get_controls(self, events):
-        for controller in self.controllers:
-            for t in controller.get_active_controls(pygame.key.get_pressed()):
-                if t not in self.keys:
-                    self.keys.append(t)
-            for t in controller.get_up_event_controls(events):
-                if t not in self.u_events:
-                    self.u_events.append(t)
-            for t in controller.get_down_event_controls(events):
-                if t not in self.d_events:
-                    self.d_events.append(t)
+        for control in self.controller.get_active_controls(pygame.key.get_pressed()):
+            if control not in self.keys:
+                self.keys.append(control)
+        for event in self.controller.get_event_controls(events):
+            if event not in self.events:
+                self.events.append(event)
 
     def reset_queues(self):
         self.keys = []
-        self.u_events = []
-        self.d_events = []
+        self.events = []
+
+    def get_event(self, code, type_):
+        for event in self.events:
+            if event.code == code and event.type == type_:
+                return True
+        return False
+
+    def get_inventory(self):
+        return self.inventory
+
+    def add_inventory(self, material, count: int = 1):
+        if material in self.inventory:
+            self.inventory[material] = self.inventory[material] + count
+        else:
+            self.inventory[material] = count

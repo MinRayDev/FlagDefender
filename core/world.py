@@ -1,4 +1,5 @@
 import enum
+from typing import Tuple
 
 
 class Facing(enum.Enum):
@@ -9,7 +10,9 @@ class Facing(enum.Enum):
 
 
 class World:
-    def __init__(self, name):
+    def __init__(self, name, floor: int, size: Tuple[int, int]):
         self.name = name
         self.entities = []
         self.living_entities = []
+        self.floor = floor
+        self.size = size

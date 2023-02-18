@@ -1,28 +1,26 @@
 import pygame
 
-from entities.Object import Object
+from core.menus.elements.element import Element
 
 
-class Slider(Object):
+class Slider(Element):
     def __init__(self, x, y, width, height, color):
-        super().__init__(x, y, None, width, height)
         self.rectangle_line = pygame.Rect(x, y, width, height)
         self.color = color
-        self.is_hover = False
         self.rectangle_selector = pygame.Rect(x-height+2//2, y-3, height+2, height+6)
-        self.test = False
+        self.is_dragged = False
+        super().__init__(x, y, width, height, self.rectangle_selector)
 
-    def activity(self, kwargs):
-        if self.rectangle_selector.collidepoint(pygame.mouse.get_pos()) or self.test:
+    def activity(self, _):
+        if self.rectangle_selector.collidepoint(pygame.mouse.get_pos()) or self.is_dragged:
             self.is_hover = True
             if pygame.mouse.get_pressed()[0] == 1:
-                self.test = True
+                self.is_dragged = True
                 self.drag()
-                self.get()
                 if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
                     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
             else:
-                self.test = False
+                self.is_dragged = False
         else:
             self.is_hover = False
 
@@ -43,6 +41,3 @@ class Slider(Object):
     def get(self) -> float:
         abs_value: int = self.rectangle_selector.x+self.rectangle_selector.width//2 - self.rectangle_line.x
         return float((abs_value/self.rectangle_line.width)*100)
-
-    def hover(self) -> int | None:
-        return pygame.SYSTEM_CURSOR_HAND if self.rectangle_selector.collidepoint(pygame.mouse.get_pos()) else None

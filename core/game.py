@@ -18,7 +18,7 @@ class Game:
         self.version = "0.0.1"
         self.menus = []
         self.actual_menu: Optional[Menu] = None
-        self.worlds = [core.world.World("overworld")]
+        self.worlds = [core.world.World("overworld", 80, (5000, 720))]
         self.queue = []
         self.controllers = load_controllers()
         self.actual_world = self.worlds[0]
@@ -26,8 +26,12 @@ class Game:
         self.game_websocket = WsClient("127.0.0.1", "5000")
         if self.online:
             self.game_websocket.run()
-        self.screen = pygame.display.set_mode((500, 500))
+        self.screen = pygame.display.set_mode((1080, 720))
         self.players: list = []
+        self.TPS: float = 60
+        self.scroll = 0
+        self.run = True
+        self.main_player = None
         # win = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
     def reset_world(self):
@@ -35,3 +39,6 @@ class Game:
 
     def reset_menu(self):
         self.actual_menu = None
+
+    def set_menu(self, menu: Menu):
+        self.actual_menu = menu

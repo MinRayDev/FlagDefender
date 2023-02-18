@@ -1,14 +1,15 @@
 import pygame
 
 from core.game import Game
-from core.menus.elements.button import Button
-from core.menus.elements.slider import Slider
-from core.menus.elements.text import Text
-from core.menus.elements.textentry import TextEntry
+from core.menus.elements.impl.button import Button
+from core.menus.elements.impl.checkbox import Checkbox
+from core.menus.elements.impl.slider import Slider
+from core.menus.elements.impl.text import Text
+from core.menus.elements.impl.textentry import TextEntry
 from core.menus.menu import Menu
 
 
-class MainMenu(Menu):
+class TestMenu(Menu):
     def __init__(self):
         super().__init__("Main Menu")
         self.on = False
@@ -20,17 +21,22 @@ class MainMenu(Menu):
         self.text.rectangle.center = (500 // 2, 65)
         self.slider = Slider(10, 150, 100, 4, (255, 255, 255))
         self.slider_text = Text('0', 130, 135, (153, 170, 181))
-        self.text_input = TextEntry('Test', 10, 175, (153, 170, 181))
-        self.elems = [self.text_input, self.slider, self.button]
+        self.text_input = TextEntry('Test', 10, 175, 150, 50, (153, 170, 181))
+        self.im = pygame.image.load(r".//resources/game-controller.svg")
+        self.checkbox = Checkbox(20, 300, 100, 50, (0, 0, 0))
+        self.elems = [self.text_input, self.slider, self.button, self.checkbox]
 
-    def activity(self, **kwargs):
+    def activity(self):
+        inputs = self.get_queue()
         for button in self.buttons:
-            button.activity(kwargs)
-        self.slider.activity(kwargs)
+            button.activity(inputs)
+            pass
+        self.slider.activity(inputs)
         self.slider_text.change(str(self.slider.get()))
-        self.text_input.activity(kwargs)
+        self.text_input.activity(inputs)
+        self.checkbox.activity(inputs)
         for elem in self.elems:
-            if elem.hover() is not None:
+            if elem.hover() is not None and Game.instance.actual_menu is not None:
                 if pygame.mouse.get_cursor() != elem.hover():
                     pygame.mouse.set_cursor(elem.hover())
                     break
@@ -45,3 +51,5 @@ class MainMenu(Menu):
         self.slider_text.draw(surface)
         self.slider.draw(surface)
         self.text_input.draw(surface)
+        self.checkbox.draw(surface)
+        surface.blit(self.im, (50, 50))
