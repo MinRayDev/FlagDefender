@@ -1,5 +1,5 @@
-from core.game import Game
-from entities.Entity import Entity
+from entities.Entity import Entity, DamageType
+from entities.Item import ItemEntity
 
 
 class Projectile(Entity):
@@ -10,12 +10,14 @@ class Projectile(Entity):
         self.damage_value = damage_value
         self.motion_x, self.motion_y = 0, 0
 
-    def damage(self):
-        for entity in Game.instance.actual_world.entities:
-            if entity != self and entity != self.author:
+    def do_damage(self):
+        for entity in self.world.entities:
+            if entity != self and entity != self.author and not isinstance(entity, ItemEntity):
+                if isinstance(entity, Projectile) and entity.author == self.author:
+                    return
                 if ((entity.x <= self.x <= entity.x + entity.width) or (
                         entity.x <= self.x + self.width <= entity.x + entity.width)) and (
                         (entity.y <= self.y <= entity.y + entity.height) or (
                         entity.y <= self.y + self.height <= entity.y + entity.height)):
-                    entity.health -= self.damage_value
+                    entity.damage(self.damage_value, DamageType.PROJECTILE)
                     self.death()

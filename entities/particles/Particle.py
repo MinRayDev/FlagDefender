@@ -1,8 +1,7 @@
 import pygame
 
-from entities.Object import Object
-from core.game import Game
 from core.world import Facing, World
+from entities.Object import Object
 
 
 class Particle(Object):
@@ -43,11 +42,11 @@ class Particle(Object):
     def activity(self, **_):
         self.time_life += 1
         if self.time_life > 60*5:
-            del Game.instance.actual_world.entities[Game.instance.actual_world.entities.index(self)]
+            del self.world.entities[self.world.entities.index(self)]
 
     def draw(self, surface):
         self.test = (self.test[0]+3, self.test[1] + self.test_y)
         pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(self.x, self.y, self.width, self.height))
         pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(self.test[0], self.y-2, 16, self.height+4))
         if self.test[0] > self.x + self.width:
-            del Game.instance.actual_world.entities[Game.instance.actual_world.entities.index(self)]
+            del self.world.entities[self.world.entities.index(self)]

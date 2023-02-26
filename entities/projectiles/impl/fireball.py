@@ -1,7 +1,10 @@
+from core.client import Client
+from core.world import Facing
 from entities.Entity import Entity
 from entities.projectiles.projectile import Projectile
-from core.game import Game
-from core.world import Facing
+from network.event import EventType
+from util import sprites
+from util.instance import get_client, get_game
 
 
 class Fireball(Projectile):
@@ -30,6 +33,17 @@ class Fireball(Projectile):
         self.x += self.motion_x
         self.y += self.motion_y
 
-        self.damage()
-        if self.x > Game.instance.screen.get_width()*5 or self.x+self.width < 0-Game.instance.screen.get_width()*5 or self.y > Game.instance.screen.get_height()*5 or self.y + self.height < 0:
+        self.do_damage()
+        get_client().send_event(EventType.ENTITY_MOVEMENT, {"x": self.x, "y": self.y, "entity_id": str(self.uuid)})
+        if self.x > Client.get_screen().get_width()*5 or self.x+self.width < 0-Client.get_screen().get_width()*5 or self.y > Client.get_screen().get_height()*5 or self.y + self.height < 0:
             self.death()
+
+    def to_json(self):
+        return {"x": self.x, "y": self.y, "world": self.world.name, "facing": self.facing.value, "uuid": str(self.uuid), "author_uuid": str(self.author.uuid)}
+
+    @staticmethod
+    def from_json(json_dict):
+        fb = Fireball(json_dict["x"], json_dict["y"], get_game().get_entity_by_uuid(json_dict["author_uuid"]))
+        fb.uuid = json_dict["uuid"]
+        fb.source = 1
+        return fb

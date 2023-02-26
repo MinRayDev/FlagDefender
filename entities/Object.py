@@ -1,7 +1,8 @@
 from typing import Optional
 
 from core.world import World, Facing
-from core.game import Game
+
+
 
 class Object:
     """Class 'Object', un objet.
@@ -20,13 +21,13 @@ class Object:
         self.world = world
         self.width = width
         self.height = height
-        self.collisions = True
+        self.has_collisions = True
 
     def get_collisions(self):
         col = {Facing.NORTH: True, Facing.EAST: True, Facing.SOUTH: True, Facing.WEST: True}
-        if self.collisions:
-            for entity in Game.instance.actual_world.entities:
-                if self != entity and entity.collisions:
+        if self.has_collisions:
+            for entity in self.world.entities:
+                if self != entity and entity.has_collisions:
                     if entity.x < self.x <= entity.x + entity.width and (
                             (entity.y <= self.y <= entity.y + entity.height) or (
                             entity.y <= self.y + self.height <= entity.y + entity.height)):
@@ -47,3 +48,9 @@ class Object:
 
     def activity(self):
         pass
+
+    def contact(self, entity):
+        return ((entity.x <= self.x <= entity.x + entity.width) or (
+                entity.x <= self.x + self.width <= entity.x + entity.width)) and (
+                (entity.y <= self.y <= entity.y + entity.height) or (
+                entity.y <= self.y + self.height <= entity.y + entity.height))

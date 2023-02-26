@@ -1,7 +1,7 @@
-from core.game import Game
+from core.client import Client
+from core.world import Facing
 from entities.Entity import Entity
 from entities.projectiles.projectile import Projectile
-from core.world import Facing
 
 
 class Waterball(Projectile):
@@ -36,5 +36,5 @@ class Waterball(Projectile):
             self.y += self.gravity_value
             self.gravity_value += 0.1
 
-        if self.x > Game.instance.screen.get_width()*5 or self.x+self.width < 0-Game.instance.screen.get_width()*5 or self.y > Game.instance.screen.get_height()*5:
+        if self.x > Client.get_screen().get_width()*5 or self.x+self.width < 0-Client.get_screen().get_width()*5 or self.y > Client.get_screen().get_height()*5:
             self.death()
