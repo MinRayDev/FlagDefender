@@ -6,7 +6,7 @@ from entities.livingentities.mob_basic import MobBasic
 from util.instance import get_game
 
 
-class Spawner(Entity):
+class Flag(Entity):
     def __init__(self, x, y, world):
         super().__init__(x, y, r"./resources/sprites/spawner", world)
         self.y = Client.get_screen().get_height() - self.world.floor - self.height

@@ -1,14 +1,13 @@
-import time
-
 import pygame
 from catppuccin import Flavour
 
-from core.chat.chat import MessageType
 from core.ui.element.impl.rectangle import Rectangle
+from core.ui.element.impl.text import Text
 from core.ui.game_menu import GameMenu
-from util.fonts import Fonts
-from util.instance import get_game
+from entities.livingentities.entity_player import PlayerEntity
+from util import client_utils
 from util.instance import get_client
+from util.instance import get_game
 
 
 class HUD(GameMenu):
@@ -27,6 +26,14 @@ class HUD(GameMenu):
         self.health_rect_base.draw(surface)
         health_percentage = get_game().main_player.entity.health/get_game().main_player.entity.max_health
         pygame.draw.rect(surface, Flavour.frappe().red.rgb, pygame.Rect(self.health_rect_base.x, self.height - self.height//30 - self.height//50, int((self.width//8)*health_percentage), self.height//30))
+        Text("Kills: " + str(get_game().main_player.kills), self.width-self.width//8, self.height//20, Flavour.frappe().text.rgb).draw(surface)
+        Text("Round: " + str(get_game().wave), self.width-self.width//8, self.height//10, Flavour.frappe().text.rgb).draw(surface)
+        Text("Gold: " + str(get_game().main_player.gold), self.width-self.width//8, self.height//10 + self.height//10 - self.height//20, Flavour.frappe().text.rgb).draw(surface)
+        t = 0
+        for entity in client_utils.get_out_of_screen():
+            if isinstance(entity, PlayerEntity):
+                Text(str(entity)[:2], self.width - 40, self.height // 2 + 15 + t * 40, Flavour.frappe().text.rgb).draw(surface)
+                t += 1
 
     @classmethod
     def alpha_draw(cls, surface, color, rect: pygame.Rect):

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from core.ingame.item.item_type import ItemType
 
 

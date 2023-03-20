@@ -128,9 +128,9 @@ class WorldMenu(Menu):
                 if isinstance(elem, ButtonText):
                     if elem.has_been_clicked and self.selected_button != elem:
                         self.selected_button = elem
-                        print(elem.text.content)
+                        print(elem.text_content)
                     elif elem.has_been_clicked and self.selected_button == elem:
-                        print("aaaa", elem.text.content)
+                        print("aaaa", elem.text_content)
         else:
             if pygame.mouse.get_cursor().data[0] != pygame.SYSTEM_CURSOR_ARROW and pygame.mouse.get_cursor().data[0] != pygame.SYSTEM_CURSOR_IBEAM:
                 print("ooo")
@@ -156,12 +156,12 @@ class WorldMenu(Menu):
 
     def delete(self):
         if self.selected_button is not None:
-            os.remove(os.path.join(files.get_save_path(), self.selected_button.text.content + ".json"))
+            os.remove(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json"))
         self.reload()
 
     def duplicate(self):
         if self.selected_button is not None:
-            shutil.copyfile(os.path.join(files.get_save_path(), self.selected_button.text.content + ".json"), os.path.join(files.get_save_path(), self.selected_button.text.content + " - Copy.json"))
+            shutil.copyfile(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json"), os.path.join(files.get_save_path(), self.selected_button.text_content + " - Copy.json"))
         self.reload()
 
     def reload(self):

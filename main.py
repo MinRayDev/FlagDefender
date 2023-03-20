@@ -2,9 +2,6 @@ import pygame
 
 from core.client import Client
 from core.game import Game
-from core.ingame.spell.impl.bomb import Bomb
-from core.ingame.spell.impl.turret import Turret
-from core.ingame.spell.impl.wall import Wall
 from core.ui.game_menu import GameMenu
 from core.ui.impl.ingame_menu.chat import ChatMenu
 from core.ui.impl.ingame_menu.chat_message import ChatMessageMenu
@@ -14,10 +11,10 @@ from core.ui.impl.main_menu import MainMenu
 from core.player import Player
 from core.world import World
 from entities.Entity import Entity
-from entities.livingentities.Mob import Mob
 from entities.livingentities.entity_player import PlayerEntity
-from util.controllers import Controller
-from util.input.controls import ControlsEventTypes, Sources
+from entities.livingentities.mob_mortar import MobMortar
+from util.input.controllers import Controller
+from util.input.controls import ControlsEventTypes, Sources, test
 
 game: Game = Game()
 Game.instance = game
@@ -26,8 +23,8 @@ Client.instance = client
 
 # player = PlayerEntity(200, 200, ingame.actual_world)
 
-Mob(1000, 0, game.actual_world)
-Mob(600, 0, game.actual_world)
+MobMortar(1000, 0, game.actual_world)
+MobMortar(600, 0, game.actual_world)
 # Spawner(500, 0, ingame.actual_world)
 game.actual_menu = MainMenu()
 t_world: World = World("test_world", 80, (5000, 720))
@@ -42,7 +39,7 @@ if len(game.players) == 0:
 client.controllers.append(keyboard)
 client.controllers.append(Controller(Sources.mouse, None))
 game.main_player = game.players[0]
-test: Entity = Entity(300, 300, r"./resources/sprites/palkia_test", game.actual_world, gravity=False)
+test_e: Entity = Entity(300, 300, r"./resources/sprites/palkia_test", game.actual_world, gravity=False)
 # portal_test = PortalEntity(250, 100, game.main_player.entity.world, t_world)
 # portal_test1 = PortalEntity(-100, 100, t_world, game.main_player.entity.world)
 chat_menu = ChatMessageMenu()
@@ -70,6 +67,7 @@ while game.run:
         if game.actual_menu is not None and not isinstance(game.actual_menu, GameMenu):
             game.actual_menu.activity()
         else:
+
             for elem in game.queue:
                 del game.queue[game.queue.index(elem)]
                 game.actual_world.entities.append(elem)
@@ -85,6 +83,10 @@ while game.run:
                     Game.instance.set_menu(ChatMenu())
                 if player_.get_event(pygame.K_e, ControlsEventTypes.DOWN) and Game.instance.actual_menu is None:
                     Game.instance.set_menu(InventoryMenu())
+                for t in test:
+                    if player_.get_event(t, ControlsEventTypes.DOWN) and Game.instance.actual_menu is not None and player_.get_inventory().get_item_count(test[t]) > 0:
+                        player_.get_inventory().remove_item(test[t], 1)
+                        exec(test[t].get_usage() + "(get_game().main_player)")
                 player_.entity.activity(keys=player_.keys, events=player_.events)
                 player_.reset_queues()
                 break

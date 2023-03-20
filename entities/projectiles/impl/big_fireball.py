@@ -45,4 +45,4 @@ class BigFireball(Projectile):
                         (entity.y <= self.y <= entity.y + entity.height) or (
                         entity.y <= self.y + self.height <= entity.y + entity.height)):
                     self.health -= entity.health
-                    entity.damage(self.damage_value, DamageType.PROJECTILE)
+                    entity.damage(self.damage_value, DamageType.PROJECTILE, self.author)

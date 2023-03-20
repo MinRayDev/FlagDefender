@@ -1,14 +1,16 @@
 import enum
+from typing import Optional, Callable
+
 
 from util.sprites import load
 
 
 class ItemType(enum.Enum):
-    gold = {"id": 0, "sprites_path": r"./resources/sprites/items/gold", "stack_limit": 16, "name": "Gold"}
+    gold = {"id": 0, "sprites_path": r"./resources/sprites/items/gold", "stack_limit": 16, "name": "Gold", "is_bindable": False, "usage": None}
     # magic_essence = {"id": 1, "sprites_path": "", "stack_limit": 16, "name": "Magic_Essence"}
-    wall_spell = {"id": 2, "sprites_path": "", "stack_limit": 16, "name": "Wall_Spell"}
-    turret_spell = {"id": 3, "sprites_path": "", "stack_limit": 16, "name": "Turret_Spell"}
-    sword = {"id": 100, "sprites_path": r"./resources/sprites/items/test", "stack_limit": 1, "name": "Sword"}
+    wall_spell = {"id": 2, "sprites_path": r"./resources/sprites/items/wall", "stack_limit": 16, "name": "Wall_Spell", "is_bindable": True, "usage": "Wall.new"}
+    turret_spell = {"id": 3, "sprites_path": r"./resources/sprites/items/turret", "stack_limit": 16, "name": "Turret_Spell", "is_bindable": True, "usage": "Turret.new"}
+    sword = {"id": 100, "sprites_path": r"./resources/sprites/items/test", "stack_limit": 1, "name": "Sword", "is_bindable": False, "usage": None}
     
     def get_sprites(self):
         return load(self.value["sprites_path"])
@@ -27,6 +29,16 @@ class ItemType(enum.Enum):
 
     def get_name(self):
         return self.value["name"]
+
+    def is_bindable(self):
+        return self.value["is_bindable"]
+
+    def has_usage(self):
+        return self.value["usage"] is not None
+
+    def get_usage(self) -> Optional[str]:
+        if self.value["usage"] is not None:
+            return self.value["usage"]
 
     @staticmethod
     def get_names():

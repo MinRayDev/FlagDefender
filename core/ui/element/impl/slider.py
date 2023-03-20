@@ -4,9 +4,12 @@ from core.ui.element.element import Element
 
 
 class Slider(Element):
-    def __init__(self, x: int, y: int, width: int, height: int, color: tuple[int, int, int], selector_color: tuple[int, int, int] = None):
+    def __init__(self, x: int, y: int, width: int, height: int, color: tuple[int, int, int], min_number: int = 0, max_number: int = 100, value: int = 0, selector_color: tuple[int, int, int] = None):
         self.rectangle_line: pygame.Rect = pygame.Rect(x, y, width, height)
         self.color: tuple[int, int, int] = color
+        self.min = min_number
+        self.max = max_number
+
         if selector_color is None:
             self.selector_color: tuple[int, int, int] = color
         else:
@@ -14,6 +17,7 @@ class Slider(Element):
         self.rectangle_selector: pygame.Rect = pygame.Rect(x-height+2//2, y-3, height+2, height+6)
         self.is_dragged: bool = False
         super().__init__(x, y, width, height, self.rectangle_selector)
+        self.set_value(value)
 
     def activity(self, _) -> None:
         if self.rectangle_selector.collidepoint(pygame.mouse.get_pos()) or self.is_dragged:
@@ -45,4 +49,8 @@ class Slider(Element):
 
     def get(self) -> float:
         abs_value: int = self.rectangle_selector.x+self.rectangle_selector.width//2 - self.rectangle_line.x
-        return float((abs_value/self.rectangle_line.width)*100)
+        return self.min + float((abs_value/self.rectangle_line.width)*self.max)
+
+    def set_value(self, value: float) -> None:
+        t = ((value- self.min)/self.max)*self.rectangle_line.width
+        self.rectangle_selector.x = self.rectangle_line.x + t - self.rectangle_selector.width//2

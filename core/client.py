@@ -8,8 +8,9 @@ import pygame
 from pygame import Surface, SurfaceType
 from core.game import Game
 from network.event import EventType
+from util import settings
 
-from util.controllers import load_controllers, Controller
+from util.input.controllers import load_controllers, Controller
 
 
 class Client:
@@ -32,6 +33,7 @@ class Client:
         self.party_id = None
         self.is_party_host: bool = False
         self.init_files()
+        self.load_settings()
 
     @classmethod
     def get_screen(cls):
@@ -67,3 +69,9 @@ class Client:
             files.create_directory(files.get_save_path())
         if not files.file_exists(files.get_settings_file()):
             files.create_settings_file()
+            settings.write_settings(files.get_settings_file())
+
+    @classmethod
+    def load_settings(cls):
+        from util import files
+        settings.load_settings(files.get_settings_file())

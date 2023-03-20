@@ -1,8 +1,9 @@
-from core.world import Facing
-from util.world_util import teleport
+from __future__ import annotations
+
 from core.ingame.spell.spell import Spell
 from core.player import Player
-from entities.Item import ItemEntity
+from core.world import Facing
+from util.world_util import teleport
 
 
 class NearTp(Spell):
@@ -12,3 +13,7 @@ class NearTp(Spell):
             teleport(author.entity, author.entity.world, author.entity.x + author.entity.width*1.5)
         elif author.entity.facing == Facing.WEST:
             teleport(author.entity, author.entity.world, author.entity.x - author.entity.width*1.5)
+
+    @staticmethod
+    def new(author: Player) -> NearTp:
+        return NearTp(author)

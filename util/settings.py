@@ -11,7 +11,7 @@ def write_settings(fp):
 
 def load_settings(fp):
     settings_dict = json.load(open(fp, "r"))
-    for control in settings_dict: # ça le fait déjà cette loop
+    for control in settings_dict:
         if getattr(Controls, control).value != settings_dict[control]:
             for key in settings_dict[control]:
                 getattr(Controls, control).value[key] = settings_dict[control][key]

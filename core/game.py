@@ -30,6 +30,7 @@ class Game:
         self.main_player: Optional[Player] = None
         self.chat: Chat = Chat()
         self.TPS: float = 60
+        self.wave = 1
         # win = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
     def reset_world(self) -> None:

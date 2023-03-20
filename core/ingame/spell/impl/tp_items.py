@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from util.world_util import teleport
 from core.ingame.spell.spell import Spell
 from core.player import Player
@@ -10,3 +12,7 @@ class TpItems(Spell):
         for entity in author.entity.world.entities:
             if isinstance(entity, ItemEntity):
                 teleport(entity, author.entity.world, author.entity.x)
+
+    @staticmethod
+    def new(author: Player) -> TpItems:
+        return TpItems(author)

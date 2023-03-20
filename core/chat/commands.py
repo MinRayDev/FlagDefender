@@ -10,8 +10,7 @@ class Commands:
     def tp(args):
         if len(args) != 0 and str(args[0]).lstrip("-").isnumeric():
             x = int(args[0])
-            if x is not None and -get_game().main_player.entity.world.size[
-                0] <= x and x + get_game().main_player.entity.width <= get_game().main_player.entity.world.size[0]:
+            if x is not None and -get_game().main_player.entity.world.size[0] <= x and x + get_game().main_player.entity.width <= get_game().main_player.entity.world.size[0]:
                 teleport(get_game().main_player.entity, get_game().main_player.entity.world, x)
             else:
                 get_game().chat.write("x invalid", MessageType.GAME)

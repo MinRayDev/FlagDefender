@@ -3,14 +3,17 @@ from __future__ import annotations
 import enum
 import uuid
 from typing import Optional
+
+
 from core.world import Facing, World
 from entities.Object import Object
+
 from util import sprites
 from util.instance import get_game
 from util.instance import get_client
 
 
-# TODO: passer les collisions sur les objets et en fonction d'une taille et pas du sprite (recalc au changement de sprite)
+# TODO: fonction d'une taille et pas du sprite (recalc au changement de sprite)
 class Entity(Object):
     def __init__(self, x: int, y: int, sprites_path: str, world: World, facing: Optional[Facing] = None,
                  health=float("inf"), gravity=True):
@@ -61,10 +64,17 @@ class Entity(Object):
     def is_flying(self):
         return self.y + self.height < get_client().get_screen().get_height() - self.world.floor
 
-    def damage(self, amount: float, damage_type: DamageType):
+    def damage(self, amount: float, damage_type: DamageType, author: Entity = None):
+        from entities.livingentities.entity_player import PlayerEntity
+        from core.player import Player
+        if (damage_type == DamageType.PROJECTILE or damage_type == DamageType.PHYSICAL or damage_type == DamageType.EXPLOSION) and author is None:
+            raise ValueError("Author must be specified")
         self.health -= amount
         if self.health <= 0:
             self.death()
+            if isinstance(author, PlayerEntity):
+                Player.get_by_entity(author).kills += 1
+                print(Player.get_by_entity(author).kills)
 
     def gravity(self):
         if self.has_gravity:

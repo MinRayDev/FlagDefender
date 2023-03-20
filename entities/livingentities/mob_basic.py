@@ -9,37 +9,30 @@ from core.ingame.item.item_type import ItemType
 from core.world import Facing
 from entities.Entity import Entity, EntityType
 from entities.Item import ItemEntity
+from entities.livingentities.mob import Mob
 from entities.projectiles.impl.fireball import Fireball
 from network.event import EventType
 from network.types import NetworkEntityTypes
 from util.instance import get_game, get_client
 
 
-class Mob(Entity):
+class MobBasic(Mob):
     def __init__(self, x, y, world, facing=Facing.SOUTH):
         from util.instance import get_client
         super().__init__(x, y, sprites_path=r"./resources/sprites/enemy_1", facing=facing, world=world, health=100)
         self.type = EntityType.ENEMY
         self.client = get_client()
-        self.speed = 3
         self.i = 0
         self.max_i = 15
-        self.__goto = ""
-        self.attack_i = 0
         self.last_facing = self.facing
-        self.y = Client.get_screen().get_height() - self.world.floor - self.height
-        self.has_ia = True
+        self.to_floor()
+        self.cooldown = 31
+        self.distance_damage = True
 
     def activity(self, **kwargs):
-        if self.attack_i > 30:
-            self.attack_i = 0
-            if random.randint(30, 100) > 70:
-                thread = threading.Thread(target=self.attack, daemon=True)
-                thread.start()
         super().activity()
         self.last_facing = self.facing
         past_facing = self.facing
-        self.goto()
         if self.facing == Facing.WEST:
             if self.facing != past_facing:
                 self.i = self.max_i + self.i
@@ -68,26 +61,11 @@ class Mob(Entity):
                 self.i = 0
                 # self.change_sprite()
         self.i += 1
-        self.attack_i += 1
-
-    def goto(self):
-        if self.has_ia:
-            col = self.get_collisions()
-            self.last_facing = self.facing
-            if self.x == self.__goto or type(self.__goto) == str:
-                self.__goto = random.randint(1, Client.get_screen().get_width() - self.width)
-            if self.x != self.__goto:
-                if self.x > self.__goto:
-                    if col[Facing.WEST]:
-                        self.x -= 1
-                        self.facing = Facing.WEST
-                elif col[Facing.EAST]:
-                    self.x += 1
-                    self.facing = Facing.EAST
 
     def attack(self):
-        fb = Fireball(self.x, self.y, self)
-        self.client.send_event(EventType.ENTITY_SPAWN, {"entity_type": NetworkEntityTypes.from_class(fb).get_value(), "entity": fb.to_json()})
+        if random.randint(30, 100) > 70:
+            fb = Fireball(self.x, self.y, self)
+            self.client.send_event(EventType.ENTITY_SPAWN, {"entity_type": NetworkEntityTypes.from_class(fb).get_value(), "entity": fb.to_json()})
 
     def death(self):
         ItemEntity(self.x + (self.width//2), r"./resources/sprites/items/test", self.world, ItemType.sword)

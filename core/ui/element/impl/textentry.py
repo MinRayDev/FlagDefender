@@ -5,7 +5,7 @@ import pygame
 from core.ui.element.element import Element
 from util.colors import Colors
 from util.fonts import Fonts
-from util.input.controls import Controls, Mouse
+from util.input.controls import Controls, Mouse, Inputs
 
 
 #TODO opti code
@@ -14,8 +14,6 @@ class TextEntry(Element):
         super().__init__(x, y, width, height, None)
         self.placeholder: str = placeholder
         self.visual_text: pygame.Surface = pygame.font.Font(Fonts.product_sans, self.height).render(placeholder, True, color)
-
-
         self.color: tuple[int, int, int] = color
         self.background_color: tuple[int, int, int] = background_color
         self.selected_line_color: tuple[int, int, int] = Colors.red
@@ -42,26 +40,7 @@ class TextEntry(Element):
             if Mouse.left.get_key() in inputs.get_codes() and self.unselect:
                 self.selected = False
         if self.selected:
-            for elem_ in inputs.raw_inputs:
-                if elem_.type == pygame.TEXTINPUT and (len(self.text) < self.limit or self.limit == -1):
-                    self.text += elem_.text
-                elif elem_.type == pygame.KEYDOWN and elem_.key == pygame.K_BACKSPACE:
-                    self.is_deleting = True
-                    self.del_init_time = time.time()
-                    self.text = self.text[:-1]
-                elif elem_.type == pygame.KEYUP and elem_.key == pygame.K_BACKSPACE:
-                    self.is_deleting = False
-                elif elem_.type == pygame.KEYDOWN and (elem_.__dict__["unicode"] == "\x03" or elem_.__dict__["unicode"] == "\x16"):
-                    if pygame.scrap.get(pygame.SCRAP_TEXT) is not None:
-                        clipboard = pygame.scrap.get(pygame.SCRAP_TEXT).decode("utf-8")[:-1]
-                        if len(self.text + clipboard) <= self.limit or self.limit == -1:
-                            self.text += clipboard
-                # if elem_.type == pygame.KEYDOWN:
-                #     print(elem_)
-                # self.text = " ".join(self.get_text().split(" ")[:-1])
-            if self.is_deleting and self.del_init_time + 0.5 <= time.time() and self.del_last_time + 0.05 <= time.time():
-                self.text = self.text[:-1]
-                self.del_last_time = time.time()
+            self.entry(inputs)
             self.change(self.text)
 
     def draw(self, surface) -> None:
@@ -89,3 +68,26 @@ class TextEntry(Element):
 
     def get_text(self) -> str:
         return self.text
+
+    def entry(self, inputs: Inputs) -> None:
+        for elem_ in inputs.raw_inputs:
+            if elem_.type == pygame.TEXTINPUT and (len(self.text) < self.limit or self.limit == -1):
+                self.text += elem_.text
+            elif elem_.type == pygame.KEYDOWN and elem_.key == pygame.K_BACKSPACE:
+                self.is_deleting = True
+                self.del_init_time = time.time()
+                self.text = self.text[:-1]
+            elif elem_.type == pygame.KEYUP and elem_.key == pygame.K_BACKSPACE:
+                self.is_deleting = False
+            elif elem_.type == pygame.KEYDOWN and (
+                    elem_.__dict__["unicode"] == "\x03" or elem_.__dict__["unicode"] == "\x16"):
+                if pygame.scrap.get(pygame.SCRAP_TEXT) is not None:
+                    clipboard = pygame.scrap.get(pygame.SCRAP_TEXT).decode("utf-8")[:-1]
+                    if len(self.text + clipboard) <= self.limit or self.limit == -1:
+                        self.text += clipboard
+            # if elem_.type == pygame.KEYDOWN:
+            #     print(elem_)
+            # self.text = " ".join(self.get_text().split(" ")[:-1])
+        if self.is_deleting and self.del_init_time + 0.5 <= time.time() and self.del_last_time + 0.05 <= time.time():
+            self.text = self.text[:-1]
+            self.del_last_time = time.time()

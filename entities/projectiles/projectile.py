@@ -19,5 +19,5 @@ class Projectile(Entity):
                         entity.x <= self.x + self.width <= entity.x + entity.width)) and (
                         (entity.y <= self.y <= entity.y + entity.height) or (
                         entity.y <= self.y + self.height <= entity.y + entity.height)):
-                    entity.damage(self.damage_value, DamageType.PROJECTILE)
+                    entity.damage(self.damage_value, DamageType.PROJECTILE, self.author)
                     self.death()

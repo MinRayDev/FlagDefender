@@ -21,12 +21,12 @@ class GeneralSettingsMenu(SettingsBaseMenu):
         width = self.client.get_screen().get_width()//5
         height = self.client.get_screen().get_height()//130
         self.slider_text = Text("0", sw//2 + width//2, 0, Flavour.frappe().text.rgb)
-        self.slider_text.rectangle.x += self.slider_text.rectangle.width
+        self.slider_text.rectangle.x += sw//150
         self.slider_text.rectangle.y = sh // 10 - self.slider_text.rectangle.height // 2 + self.slider_text.rectangle.height // 6
         self.master_volume_text = Text("Master volume", sw//2 - width//2, 0, Flavour.frappe().text.rgb)
         self.master_volume_text.rectangle.x -= self.master_volume_text.rectangle.width*1.2
         self.master_volume_text.rectangle.y = sh//10 - self.master_volume_text.rectangle.height//2 + self.master_volume_text.rectangle.height//6
-        self.slider_volume = Slider(sw//2 - width//2, sh//10, width, height, Flavour.frappe().overlay0.rgb, Flavour.frappe().pink.rgb)
+        self.slider_volume = Slider(sw//2 - width//2, sh//10, width, height, Flavour.frappe().overlay0.rgb, selector_color=Flavour.frappe().pink.rgb)
         self.elems += [self.slider_volume, self.slider_text, self.master_volume_text]
 
     def activity(self):

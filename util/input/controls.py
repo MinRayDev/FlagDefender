@@ -2,6 +2,8 @@ import enum
 
 import pygame
 
+test = {}
+
 
 class Sources(enum.Enum):
     keyboard = 0
@@ -33,6 +35,9 @@ class Controls(enum.Enum):
     def get_code(self):
         return self.value["keyboard"]["code"]
 
+    def get_key(self):
+        return self.value["keyboard"]["key"]
+
     def has_button(self):
         return "button" in self.value["controller"]
 
@@ -51,15 +56,34 @@ class Controls(enum.Enum):
     @staticmethod
     def key_exists(key):
         for control in Controls:
-            if key == control.value["keyboard"]["code"]:
+            if key == control.value["keyboard"]["key"]:
                 return True
         return False
 
     @staticmethod
+    def code_exists(code):
+        for control in Controls:
+            if code == control.value["keyboard"]["code"]:
+                return True
+        return False
+
+    @staticmethod
+    def from_code(code):
+        for control in Controls:
+            if code == control.value["keyboard"]["code"]:
+                return control
+
+    @staticmethod
     def from_key(key):
         for control in Controls:
-            if key == control.value["keyboard"]["code"]:
+            if key == control.value["keyboard"]["key"]:
                 return control
+
+    @staticmethod
+    def change_key(key, code):
+        for control in Controls:
+            if code == control.value["keyboard"]["code"]:
+                control.value["keyboard"]["key"] = key
 
 
 class Mouse(enum.Enum):

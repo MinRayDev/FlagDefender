@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from core.ingame.spell.spell import Spell
 from core.player import Player
 from core.world import Facing
@@ -13,3 +15,7 @@ class Turret(Spell):
                 self.entity.x = author.entity.x + author.entity.width + 10
             case Facing.WEST:
                 self.entity.x = author.entity.x - self.entity.width - 10
+
+    @staticmethod
+    def new(author: Player) -> Turret:
+        return Turret(author)

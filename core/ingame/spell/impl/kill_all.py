@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from core.ingame.spell.spell import Spell
 from core.player import Player
 from entities.Entity import EntityType
@@ -9,3 +11,7 @@ class KillAll(Spell):
         for entity in author.entity.world.entities.copy():
             if entity.type == EntityType.ENEMY:
                 entity.death()
+
+    @staticmethod
+    def new(author: Player) -> KillAll:
+        return KillAll(author)

@@ -7,8 +7,8 @@ from network.event import EventType
 from util.world_util import teleport
 from entities.Entity import Entity, EntityType
 from core.world import Facing, World
-from util import sprites
-from util.input.controls import ControlsEventTypes
+from util import sprites, client_utils
+from util.input.controls import ControlsEventTypes, Controls
 from util.instance import get_game
 from util.instance import get_client
 
@@ -35,7 +35,7 @@ class PlayerEntity(Entity):
             return
         col = self.get_collisions()
         self.last_facing = self.facing
-        if pygame.K_LEFT in keys:
+        if Controls.left.get_key() in keys:
             if self.x > 0-self.world.size[0] and col[Facing.WEST]:
                 self.x -= self.speed
                 if get_game().main_player.entity == self:
@@ -47,7 +47,7 @@ class PlayerEntity(Entity):
                 self.facing = Facing.WEST
                 # self.change_sprite()
 
-        elif pygame.K_RIGHT in keys:
+        elif Controls.right.get_key() in keys:
             if self.x < self.world.size[0] - self.width and col[Facing.EAST]:
                 self.x += self.speed
                 if get_game().main_player.entity == self:
@@ -57,31 +57,13 @@ class PlayerEntity(Entity):
             if self.i > self.max_i:
                 self.i = 0
                 self.facing = Facing.EAST
-                # self.change_sprite()
-        # elif pygame.K_UP in keys:
-        #     self.jump_test = 5
-        #     if self.y > 0 and col[Facing.NORTH]:
-        #         self.y -= self.speed - self.jump_test
-        #     if self.facing != Facing.NORTH:
-        #         self.i = self.max_i + self.i
-        #     if self.i > self.max_i:
-        #         self.i = 0
-        #         self.facing = Facing.NORTH
-        #         # self.change_sprite()
-        #
-        # if self.jump_test != 0:
-        #     print("-----")
-        #     print(self.y)
-        #     self.y -= self.speed - self.jump_test*2
-        #     print(self.y)
-        #     self.jump_test -= 1
 
         self.i += 1
         for event in events:
-            if pygame.K_y == event.code and event.type == ControlsEventTypes.DOWN:
+            if Controls.y.get_code() == event.code and event.type == ControlsEventTypes.DOWN:
                 self.speed = 7
                 self.max_i = 8
-            if pygame.K_y == event.code and event.type == ControlsEventTypes.UP:
+            if Controls.y.get_code() and event.type == ControlsEventTypes.UP:
                 self.speed = 3
                 self.max_i = 15
         if self.x != temp_x or temp_y != self.y:

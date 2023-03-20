@@ -35,7 +35,7 @@ def nearest_entity(entity: Entity, filter_type: EntityType = None) -> Entity:
                 if entity_.type != filter_type:
                     continue
             if nearest is not None:
-                if abs(nearest.x)-abs(entity.x) > abs(entity_.x)-abs(entity.x):
+                if abs(nearest.x) - abs(entity.x) > abs(entity_.x) - abs(entity.x):
                     nearest = entity_
             else:
                 nearest = entity_
@@ -55,3 +55,21 @@ def give_item(name: str = None, item_id: int = None, amount: int = None) -> bool
             get_game().main_player.inventory.add_item(ItemType.get_by_name(name), amount)
             return True
         return False
+
+
+def area_contains(first_pos: tuple[int, Optional[int]], second_pos: tuple[int, Optional[int]], entity: Entity) -> bool:
+    if first_pos[1] is None or second_pos[1] is None:
+        return (first_pos[0] <= entity.x <= second_pos[0]) or (second_pos[0] <= entity.x <= first_pos[0])
+    return (first_pos[0] <= entity.x <= second_pos[0] and first_pos[1] <= entity.y <= second_pos[1]) or (
+                second_pos[0] <= entity.x <= first_pos[0] and second_pos[1] <= entity.y <= first_pos[1])
+
+
+def get_entities_in_area(first_pos: tuple[int, Optional[int]], second_pos: tuple[int, Optional[int]], world: World, filter_type: EntityType = None) -> list[Entity]:
+    entities: list[Entity] = []
+    for entity_ in world.entities:
+        if filter_type is not None:
+            if entity_.type != filter_type:
+                continue
+        if area_contains(first_pos, second_pos, entity_):
+            entities.append(entity_)
+    return entities

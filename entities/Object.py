@@ -1,7 +1,7 @@
 from typing import Optional
 
+from core.client import Client
 from core.world import World, Facing
-
 
 
 class Object:
@@ -54,3 +54,6 @@ class Object:
                 entity.x <= self.x + self.width <= entity.x + entity.width)) and (
                 (entity.y <= self.y <= entity.y + entity.height) or (
                 entity.y <= self.y + self.height <= entity.y + entity.height))
+
+    def to_floor(self):
+        self.y = Client.get_screen().get_height() - self.world.floor - self.height

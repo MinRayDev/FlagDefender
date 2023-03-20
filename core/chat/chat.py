@@ -1,5 +1,6 @@
 import enum
 import time
+import traceback
 
 from core.ingame.item.item_type import ItemType
 
@@ -51,6 +52,7 @@ class Chat:
 
 def execute(string: str):
     from util.instance import get_game
+    from core.chat.commands import Commands
     if string.startswith("/"):
         string = string[1:]
         cmd = string.split(" ")[0]

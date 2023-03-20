@@ -11,18 +11,18 @@ from util.instance import get_game
 
 
 class BombEntity(Projectile):
-    def __init__(self, x, y, author: PlayerEntity):
+    def __init__(self, x, y, author: Entity, inclinaison: int):
         super().__init__(x, y, r"./resources/sprites/spells/bomb", author, 60)
         self.creation_time = time.time()
         self.has_gravity = False
-        self.type = EntityType.ALLY
-        self.gravity_value = 0 - author.incline  # vitesse verticale, negative : vers le haut, positive : vers le bas (-50 max, 0, 5)
+        self.type = author.type
+        self.gravity_value = 0 - inclinaison  # vitesse verticale, negative : vers le haut, positive : vers le bas (-50 max, 0, 5)
         self.strength = 1
         self.has_collisions = False
         self.is_explosing = False
         self.explosion_frame = 0
-        if author.incline > 0:
-            self.motion_x = (10 / (author.incline + 1)) * 1.25 * self.strength  # vitesse horizontale
+        if inclinaison > 0:
+            self.motion_x = (10 / (inclinaison + 1)) * 1.25 * self.strength  # vitesse horizontale
         else:
             self.motion_x = 10 * self.strength / 2
         self.acceleration = 0.1  # acceleration verticale
@@ -47,16 +47,16 @@ class BombEntity(Projectile):
             self.x += self.motion_x
             self.y += self.gravity_value
             self.gravity_value += self.acceleration
-        if time.time() > self.creation_time + 3 or self.health <= 30:
+        if (time.time() > self.creation_time + 3 or self.health <= 30) and not self.is_explosing:
             self.explosion_start()
             for entity in self.world.entities:
                 if entity.type != self.type and entity != self:
-                    if self.x - self.width//2 <= entity.x <= self.x + self.width//2 + self.width and self.y <= entity.y <= self.y + entity.height:
-                        entity.damage(entity.health, DamageType.EXPLOSION)
-                    elif self.x - self.width//2 - self.width <= entity.x <= self.x + self.width//2 + self.width*2 and self.y <= entity.y <= self.y + entity.height:
-                        entity.damage(50, DamageType.EXPLOSION)
-                    elif self.x - self.width//2 - self.width - 50 <= entity.x <= self.x + self.width//2 + self.width*2 + 50:
-                        entity.damage(30, DamageType.EXPLOSION)
+                    if self.x - self.width//2 <= entity.x <= self.x + self.width//2 + self.width and self.y - entity.height//4 <= entity.y <= self.y + entity.height:
+                        entity.damage(entity.health, DamageType.EXPLOSION, self.author)
+                    elif self.x - self.width//2 - self.width <= entity.x <= self.x + self.width//2 + self.width*2 and self.y - entity.height//2 <= entity.y <= self.y + entity.height:
+                        entity.damage(50, DamageType.EXPLOSION, self.author)
+                    elif self.x - self.width//2 - self.width - 50 <= entity.x <= self.x + self.width//2 + self.width*2 + 50 and self.y - entity.height <= entity.y <= self.y + entity.height:
+                        entity.damage(30, DamageType.EXPLOSION, self.author)
         if self.is_explosing and not round(self.explosion_frame) < len(self.sprites):
             self.death()
 

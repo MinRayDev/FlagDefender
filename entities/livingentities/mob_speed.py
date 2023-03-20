@@ -1,4 +1,5 @@
 import random
+import threading
 
 import pygame
 from catppuccin import Flavour
@@ -6,24 +7,26 @@ from catppuccin import Flavour
 from core.client import Client
 from core.ingame.item.item_type import ItemType
 from core.world import Facing
-from entities.Entity import EntityType, DamageType
+from entities.Entity import Entity, EntityType
 from entities.Item import ItemEntity
 from entities.livingentities.mob import Mob
-from util import world_util
+from entities.projectiles.impl.fireball import Fireball
+from network.event import EventType
+from network.types import NetworkEntityTypes
 from util.instance import get_game, get_client
 
 
-class MobTank(Mob):
+class MobSpeed(Mob):
     def __init__(self, x, y, world, facing=Facing.SOUTH):
         from util.instance import get_client
-        super().__init__(x, y, sprites_path=r"./resources/sprites/enemy_tank", facing=facing, world=world, health=500)
+        super().__init__(x, y, sprites_path=r"./resources/sprites/enemy_speed", facing=facing, world=world, health=100)
         self.type = EntityType.ENEMY
         self.client = get_client()
         self.i = 0
         self.max_i = 15
-        self.cooldown = 30
         self.last_facing = self.facing
         self.to_floor()
+        self.cooldown = 30
 
     def activity(self, **kwargs):
         super().activity()
@@ -60,12 +63,8 @@ class MobTank(Mob):
 
     def attack(self):
         if random.randint(30, 100) > 70:
-            to_attack = world_util.nearest_entity(self, EntityType.ALLY)
-            if to_attack is not None:
-                if self.facing == Facing.EAST and self.x + 150 >= to_attack.x >= self.x:
-                    to_attack.damage(25, DamageType.PHYSICAL, self)
-                elif self.facing == Facing.WEST and self.x - 150 <= to_attack.x <= self.x:
-                    to_attack.damage(25, DamageType.PHYSICAL, self)
+            fb = Fireball(self.x, self.y, self)
+            self.client.send_event(EventType.ENTITY_SPAWN, {"entity_type": NetworkEntityTypes.from_class(fb).get_value(), "entity": fb.to_json()})
 
     def death(self):
         ItemEntity(self.x + (self.width//2), r"./resources/sprites/items/test", self.world, ItemType.sword)

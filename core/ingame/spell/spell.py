@@ -7,4 +7,3 @@ class Spell:
     def __init__(self, author: Player):
         self.author: Player = author
         self.entity: Optional[Entity] = None
-

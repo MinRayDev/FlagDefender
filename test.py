@@ -12,10 +12,10 @@ from core.ui.impl.main_menu import MainMenu
 from core.player import Player
 from core.world import World
 from entities.Entity import Entity
-from entities.livingentities.Mob import Mob
+from entities.livingentities.mob_basic import MobBasic
 from entities.livingentities.entity_player import PlayerEntity
 from entities.world_objects.portal import PortalEntity
-from util.controllers import Controller
+from util.input.controllers import Controller
 from util.input.controls import ControlsEventTypes, Sources
 
 game: Game = Game()
@@ -27,7 +27,7 @@ Client.instance = client
 
 # player = PlayerEntity(200, 200, ingame.actual_world)
 
-Mob(1000, 0, game.actual_world)
+MobBasic(1000, 0, game.actual_world)
 # Mob(600, 0, game.actual_world)
 # Spawner(500, 0, ingame.actual_world)
 game.actual_menu = MainMenu()

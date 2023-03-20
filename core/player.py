@@ -31,6 +31,8 @@ class Player:
         self.inventory: Inventory = Inventory()
         self.kills = 0
         self.user_id = uuid.uuid4()
+        self.kills = 0
+        self.gold = 0
 
     def get_controls(self, events):
         for control in self.controller.get_active_controls(pygame.key.get_pressed()):
@@ -84,13 +86,13 @@ class Player:
                 # KillAll(self)
                 # TpItems(self)
             if self.get_event(pygame.K_d, ControlsEventTypes.DOWN):
-                print("O")
                 to_attack = world_util.nearest_entity(self.entity, EntityType.ENEMY)
                 if to_attack is not None:
                     if self.entity.facing == Facing.EAST and self.entity.x + 150 >= to_attack.x >= self.entity.x:
-                        to_attack.damage(25, DamageType.PHYSICAL)
+                        to_attack.damage(25, DamageType.PHYSICAL, self.entity)
                     elif self.entity.facing == Facing.WEST and self.entity.x - 150 <= to_attack.x <= self.entity.x:
-                        to_attack.damage(25, DamageType.PHYSICAL)
+                        to_attack.damage(25, DamageType.PHYSICAL, self.entity)
+
     @staticmethod
     def get_by_entity(entity: PlayerEntity) -> Player:
         for player in get_game().players:
