@@ -1,51 +1,69 @@
-import random
+import math
+import time
 
-import pygame.time
-
-from core.client import Client
 from core.world import Facing
-from entities.Entity import Entity
+from entities.entity import Entity
 from entities.projectiles.impl.fireball import Fireball
-from entities.projectiles.projectile import Projectile
-from network.event import EventType
-from util import sprites
-from util.instance import get_client, get_game
+from util.instance import get_game, get_client
+from util.time_util import has_elapsed
+from util.world_util import get_dist
 
 
 class MortarBullet(Fireball):
     def __init__(self, x: int, y: int, author: Entity, target: Entity):
         super().__init__(x, y, author)
+        self.y = author.y + 10
+        if self.facing == Facing.WEST:
+            self.x = author.x - self.width - 2
+        else:
+            self.x = author.x + author.width + 2
+        self.t = 0
+        incline = 5
+        self.gravity_value = 0 - incline  # vitesse verticale, negative : vers le haut, positive : vers le bas
+        self.start_time = time.time()
+        self.target = target
 
-        target_x = random.randint(target.x, target.x + target.width // 2)
+        incline_factor: float = (10 - incline) / 10
+        angle_target = math.pi / 2 + ((math.pi / 2) * incline_factor)  # (get_dist(self, self.target)/(get_dist(self, self.target)*0.9))
 
-        match self.facing:
-            case Facing.EAST:
-                self.x = author.x + author.width
-                self.y = author.y - self.height
-            case Facing.WEST:
-                self.x = author.x
-                self.y = author.y - self.height
-        self.motion_x = (target_x - self.x) // get_game().TPS
-        self.gravity_value = (target.x - self.x) * 2 // get_game().TPS
+        self.motion_x = 10 * math.cos(angle_target)
+        if self.facing == Facing.EAST:  # /summon MobMortar 3000 overworld
+            self.motion_x *= -1
 
-    def activity(self, **kwargs):
-        if self.health <= 0:
-            self.death()
-        self.x += self.motion_x
-        if self.facing == Facing.EAST or self.facing == Facing.WEST:
+        print("dist", get_dist(author, self.target), author.x, self.target.x, max(author.x, self.target.x), min(author.x, self.target.x))
+        self.deceleration = 0.1
+        # get_dist(self, self.target)/(get_dist(self, self.target)*0.4)  # acceleration verticale
+
+    def activity(self):
+        super().activity()
+        print(self.x)
+        if self.y + self.height + self.gravity_value < get_client().get_screen().get_height() - self.world.floor:
+            self.x += self.motion_x
             self.y += self.gravity_value
-            self.gravity_value += 1
+            self.gravity_value += self.deceleration
+            self.gravity_value = max(min(self.gravity_value, 10), -10)
+
+        elif self.t >= 30:
+            print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+            self.death()
+        else:
+            print("aadzdzdzdzaqfgrfegqgre(")
+            self.t += 1
+
+        if self.x > get_client().get_screen().get_width() * 5 or self.x + self.width < 0 - get_client().get_screen().get_width() * 5 or self.y > get_client().get_screen().get_height() * 5:
+            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+            self.death()
+        elif has_elapsed(self.start_time, 10):
+            self.death()
 
         self.do_damage()
-        if self.x > Client.get_screen().get_width() * 5 or self.x + self.width < 0 - Client.get_screen().get_width() * 5 or self.y > Client.get_screen().get_height() * 5:
-            self.death()
 
     def to_json(self):
         return {"x": self.x, "y": self.y, "world": self.world.name, "facing": self.facing.value, "uuid": str(self.uuid), "author_uuid": str(self.author.uuid)}
 
     @staticmethod
     def from_json(json_dict):
-        fb = Fireball(json_dict["x"], json_dict["y"], get_game().get_entity_by_uuid(json_dict["author_uuid"]))
+        fb = Fireball(json_dict["x"], json_dict["y"], get_game().current_level.get_entity_by_uuid(json_dict["author_uuid"]))
         fb.uuid = json_dict["uuid"]
         fb.source = 1
         return fb

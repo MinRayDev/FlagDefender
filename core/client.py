@@ -1,39 +1,36 @@
 from __future__ import annotations
 
 import base64
-import json
 import uuid
 
 import pygame
-from pygame import Surface, SurfaceType
-from core.game import Game
-from network.event import EventType
-from util import settings
+from pygame import Surface
 
-from util.input.controllers import load_controllers, Controller
+from util import settings
+from util.input.controllers import Controller
+from util.input.controls import Sources
 
 
 class Client:
     instance: Client = None
 
     def __init__(self):
-        from network.websocket_client import WsClient
+        from util import files
         self.init_game()
-        self.screen: Surface | SurfaceType = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        # self.screen: Surface | SurfaceType = pygame.display.set_mode((1080, 720))
+        self.screen: Surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
         self.init_scrapper()
         self.scroll: int = 0
         self.run: bool = True
         self.online: bool = False
-        self.controllers: list[Controller] = load_controllers()
-        self.id: str = base64.b64encode(str(uuid.uuid4()).encode("utf-8")).decode("utf-8")
-        self.game_websocket: WsClient = WsClient("127.0.0.1", "5000", self.id)
-        self.pseudo: str = "Test-1"
-        self.party_id = None
-        self.is_party_host: bool = False
+        self.controllers: list[Controller] = []
+        self.volume = 100
         self.init_files()
         self.load_settings()
+        self.datas = files.get_datas()
+        self.id = self.datas["client_id"]
+        self.controllers.append(Controller(Sources.keyboard))
+        self.controllers.append(Controller(Sources.mouse))
 
     @classmethod
     def get_screen(cls):
@@ -41,24 +38,15 @@ class Client:
 
     @classmethod
     def init_game(cls):
+        from core.game import Game
         pygame.init()
-        pygame.display.set_caption(Game.instance.name)
+        pygame.mixer.init()
+        pygame.display.set_caption(Game.name)
 
     @classmethod
     def init_scrapper(cls):
         pygame.scrap.init()
         pygame.scrap.set_mode(pygame.SCRAP_CLIPBOARD)
-
-    def start_websocket(self, party_id):
-        self.online = True
-        self.game_websocket.run(party_id)
-
-    def send_event(self, event: EventType, content):
-        if self.online:
-            self.game_websocket.send(json.dumps({"event_type": event, "content": content}))
-
-    def is_host(self):
-        return not self.online or self.is_party_host
 
     @classmethod
     def init_files(cls):
@@ -70,6 +58,9 @@ class Client:
         if not files.file_exists(files.get_settings_file()):
             files.create_settings_file()
             settings.write_settings(files.get_settings_file())
+        if not files.file_exists(files.get_data_file()):
+            files.create_data_file()
+            files.write_datas({"client_id": str(base64.b64encode(str(uuid.uuid4()).encode("utf-8")).decode("utf-8")), "user_id": str(uuid.uuid4()), "scores": []})
 
     @classmethod
     def load_settings(cls):

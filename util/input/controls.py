@@ -2,56 +2,38 @@ import enum
 
 import pygame
 
-test = {}
-
 
 class Sources(enum.Enum):
     keyboard = 0
     mouse = 1
-    controller = 2
 
 
 class Controls(enum.Enum):
-    right = {"keyboard": {"key": 1073741903, "code": pygame.K_RIGHT}, "controller": {"axis": 0, "value": 1}}
-    left = {"keyboard": {"key": 1073741904, "code": pygame.K_LEFT}, "controller": {"axis": 0, "value": -1}}
-    down = {"keyboard": {"key": 1073741905, "code": pygame.K_DOWN}, "controller": {"axis": 1, "value": 1}}
-    up = {"keyboard": {"key": 1073741906, "code": pygame.K_UP}, "controller": {"axis": 1, "value": -1}}
-    a = {"keyboard": {"key": 97, "code": pygame.K_a}, "controller": {"button": 0}}
-    b = {"keyboard": {"key": 98, "code": pygame.K_b}, "controller": {"button": 1}}
-    y = {"keyboard": {"key": 121, "code": pygame.K_y}, "controller": {"button": 3}}
-    x = {"keyboard": {"key": 120, "code": pygame.K_x}, "controller": {"button": 2}}
-    w = {"keyboard": {"key": 119, "code": pygame.K_w}}
-    d = {"keyboard": {"key": 100, "code": pygame.K_d}}
-    dipad_d = {"keyboard": {"key": 115, "code": pygame.K_s}, "controller": {"button": 12}}
-    dipad_u = {"keyboard": {"key": 122, "code": pygame.K_z}, "controller": {"button": 11}}
-    dipad_r = {"keyboard": {"key": 113, "code": pygame.K_q}, "controller": {"button": 13}}
-    dipad_l = {"keyboard": {"key": 101, "code": pygame.K_e}, "controller": {"button": 14}}
-    trigger_l = {"keyboard": {"key": 99, "code": pygame.K_c}, "controller": {"button": 9}}
-    trigger_r = {"keyboard": {"key": 118, "code": pygame.K_v}, "controller": {"button": 10}}
-    enter = {"keyboard": {"key": 13, "code": pygame.K_RETURN}}
-    esc = {"keyboard": {"key": 27, "code": pygame.K_ESCAPE}}
-    tab = {"keyboard": {"key": 9, "code": pygame.K_TAB}}
+    right_walk = {"keyboard": {"key": 1073741903, "code": pygame.K_RIGHT}}
+    left_walk = {"keyboard": {"key": 1073741904, "code": pygame.K_LEFT}}
+    run = {"keyboard": {"key": 121, "code": pygame.K_y}}
+    attack_1 = {"keyboard": {"key": 97, "code": pygame.K_a}}
+    attack_2 = {"keyboard": {"key": 98, "code": pygame.K_b}}
+    attack_3 = {"keyboard": {"key": 113, "code": pygame.K_q}}
+    attack_4 = {"keyboard": {"key": 100, "code": pygame.K_d}}
+    incline_up = {"keyboard": {"key": 1073741906, "code": pygame.K_UP}}
+    incline_down = {"keyboard": {"key": 1073741905, "code": pygame.K_DOWN}}
+    spell_1 = {"keyboard": {"key": 99, "code": pygame.K_c}}
+    spell_2 = {"keyboard": {"key": 118, "code": pygame.K_v}}
+    spell_3 = {"keyboard": {"key": 110, "code": pygame.K_n}}
+    use = {"keyboard": {"key": 114, "code": pygame.K_r}}
+    drop = {"keyboard": {"key": 119, "code": pygame.K_w}}
+    inventory = {"keyboard": {"key": 101, "code": pygame.K_e}}
+
+    return_ = {"keyboard": {"key": 13, "code": pygame.K_RETURN}, "register": True}
+    esc = {"keyboard": {"key": 27, "code": pygame.K_ESCAPE}, "register": True}
+    tab = {"keyboard": {"key": 9, "code": pygame.K_TAB}, "register": True}
 
     def get_code(self):
         return self.value["keyboard"]["code"]
 
     def get_key(self):
         return self.value["keyboard"]["key"]
-
-    def has_button(self):
-        return "button" in self.value["controller"]
-
-    def get_button(self):
-        return self.value["controller"]["button"]
-
-    def has_axis(self):
-        return "axis" in self.value["controller"]
-
-    def get_axis(self):
-        return self.value["controller"]["axis"]
-
-    def get_value(self):
-        return self.value["controller"]["value"]
 
     @staticmethod
     def key_exists(key):
@@ -81,9 +63,11 @@ class Controls(enum.Enum):
 
     @staticmethod
     def change_key(key, code):
+        from util import settings, files
         for control in Controls:
             if code == control.value["keyboard"]["code"]:
                 control.value["keyboard"]["key"] = key
+        settings.write_settings(files.get_settings_file())
 
 
 class Mouse(enum.Enum):

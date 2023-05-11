@@ -2,16 +2,16 @@ import time
 
 import pygame
 
-from core.client import Client
 from core.ui.animation.animation import Animation
 from core.ui.element.impl.button import Button
 from core.ui.element.impl.text import Text
 from core.ui.menu import Menu
+from util.instance import get_client
 
 
 class Notification(Button):
     def __init__(self, text: str, color: tuple[int, int, int], text_color: tuple[int, int, int], menu: Menu):
-        super().__init__(0, -Client.get_screen().get_height() // 18, Client.get_screen().get_width(), Client.get_screen().get_height() // 18, color)
+        super().__init__(0, -get_client().get_screen().get_height() // 18, get_client().get_screen().get_width(), get_client().get_screen().get_height() // 18, color)
         self.color: tuple[int, int, int] = color
         self.text_color: tuple[int, int, int] = text_color
         self.text: Text = Text(text, 0, 0, self.text_color)

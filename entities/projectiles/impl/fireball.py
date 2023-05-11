@@ -1,15 +1,17 @@
-from core.client import Client
+from pygame import Surface
+
 from core.world import Facing
-from entities.Entity import Entity
+from entities.entity import Entity
 from entities.projectiles.projectile import Projectile
-from network.event import EventType
-from util import sprites
-from util.instance import get_client, get_game
+from util.draw_util import draw_with_scroll
+from util.instance import get_client
 
 
 class Fireball(Projectile):
     def __init__(self, x: int, y: int, author: Entity):
-        super().__init__(x, y, sprites_path=r"./resources/sprites/test", author=author, damage_value=20)
+        super().__init__(x, y, sprites_path=r"./resources/sprites/projectiles/fireball", author=author, damage_value=20)
+        self.frame = 0
+        self.start_x = x
         match self.facing:
             case Facing.NORTH:
                 self.motion_y = -5
@@ -28,22 +30,21 @@ class Fireball(Projectile):
                 self.x -= 16
                 self.y += 20
 
-    def activity(self, **kwargs):
+    def draw(self, surface: Surface) -> None:
+        if round(self.frame) < len(self.sprites):
+            draw_with_scroll(surface, list(self.sprites.values())[round(self.frame)], self.x, self.y)
+        else:
+            self.frame = 0
+            draw_with_scroll(surface, list(self.sprites.values())[self.frame], self.x, self.y)
+        self.frame += 0.2
+
+    def activity(self):
         super().activity()
         self.x += self.motion_x
         self.y += self.motion_y
 
         self.do_damage()
-        get_client().send_event(EventType.ENTITY_MOVEMENT, {"x": self.x, "y": self.y, "entity_id": str(self.uuid)})
-        if self.x > Client.get_screen().get_width()*5 or self.x+self.width < 0-Client.get_screen().get_width()*5 or self.y > Client.get_screen().get_height()*5 or self.y + self.height < 0:
+        if self.x > get_client().get_screen().get_width() * 5 or self.x + self.width < 0 - get_client().get_screen().get_width() * 5 or self.y > get_client().get_screen().get_height() * 5 or self.y + self.height < 0:
             self.death()
-
-    def to_json(self):
-        return {"x": self.x, "y": self.y, "world": self.world.name, "facing": self.facing.value, "uuid": str(self.uuid), "author_uuid": str(self.author.uuid)}
-
-    @staticmethod
-    def from_json(json_dict):
-        fb = Fireball(json_dict["x"], json_dict["y"], get_game().get_entity_by_uuid(json_dict["author_uuid"]))
-        fb.uuid = json_dict["uuid"]
-        fb.source = 1
-        return fb
+        if abs(self.x - self.start_x) > 1000:
+            self.death()

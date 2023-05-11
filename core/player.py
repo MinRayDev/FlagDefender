@@ -1,23 +1,22 @@
 from __future__ import annotations
 
 import uuid
-from time import time
 
 import pygame
 
 from core.ingame.item.inventory import Inventory
+from core.ingame.item.item_type import ItemType
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from core.level import Level
 from core.world import Facing
-from entities.Entity import DamageType, EntityType
-
+from entities.entity import DamageType, EntityType
 from entities.livingentities.entity_player import PlayerEntity
-from entities.projectiles.impl.big_fireball import BigFireball
-from entities.projectiles.impl.fireball import Fireball
-from entities.projectiles.impl.waterball import Waterball
-from network.event import EventType
-from network.types import NetworkEntityTypes
 from util import world_util
-from util.input.controls import ControlsEventTypes
+from util.input.controls import ControlsEventTypes, Controls
 from util.instance import get_game
+from util.time_util import has_elapsed
+from util.world_util import teleport, teleport_level
 
 
 class Player:
@@ -29,10 +28,10 @@ class Player:
         self.keys = []
         self.events = []
         self.inventory: Inventory = Inventory()
+        self.inventory.add_item(ItemType.magical_essence, 32)
         self.kills = 0
-        self.user_id = uuid.uuid4()
-        self.kills = 0
-        self.gold = 0
+        self.user_id = get_client().datas["user_id"]
+        self.cooldowns = {}
 
     def get_controls(self, events):
         for control in self.controller.get_active_controls(pygame.key.get_pressed()):
@@ -55,37 +54,41 @@ class Player:
     def get_inventory(self) -> Inventory:
         return self.inventory
 
-    def attack(self):
+    def activity(self):
         from core.ingame.spell.impl.bomb import Bomb
         from core.ingame.spell.impl.turret import Turret
         from core.ingame.spell.impl.wall import Wall
-        if self.entity.death_time + 5 <= time():
-            if self.get_event(pygame.K_a, ControlsEventTypes.DOWN):
-                fb = Fireball(self.entity.x, self.entity.y, self.entity)
-                self.client.send_event(EventType.ENTITY_SPAWN,
-                                       {"entity_type": NetworkEntityTypes.from_class(fb).get_value(),
-                                        "entity": fb.to_json()})
-            if self.get_event(pygame.K_b, ControlsEventTypes.DOWN):
-                Waterball(self.entity.x, self.entity.y, self.entity)
+        from core.ingame.spell.impl.big_fireball_spell import BigFireBallSpell
+        from core.ingame.spell.impl.fireball_spell import FireBallSpell
+        from core.ui.impl.ingame_menu.chat import ChatMenu
+        from core.ui.impl.ingame_menu.inventory import InventoryMenu
+        from core.ui.impl.ingame_menu.esc_menu import EscMenu
+        from core.ingame.spell.impl.arrow_spell import ArrowSpell
+        if self.get_event(Controls.esc.get_code(), ControlsEventTypes.DOWN) and get_game().current_menu is None:
+            get_game().set_menu(EscMenu())
+        if self.get_event(Controls.return_.get_code(), ControlsEventTypes.DOWN) and get_game().current_menu is None:
+            get_game().set_menu(ChatMenu())
+        if self.get_event(Controls.inventory.get_code(), ControlsEventTypes.DOWN) and get_game().current_menu is None:
+            get_game().set_menu(InventoryMenu())
+        if has_elapsed(self.entity.death_time, 5):
+            if self.get_event(Controls.attack_1.get_code(), ControlsEventTypes.DOWN):
+                FireBallSpell.new(self)
+            if self.get_event(Controls.attack_2.get_code(), ControlsEventTypes.DOWN):
 
-            # if self.get_event(pygame.K_x, ControlsEventTypes.DOWN):
-            #     TrajBall(self.entity.x, self.entity.y, self.entity)
-            if self.get_event(pygame.K_q, ControlsEventTypes.DOWN):
-                BigFireball(self.entity.x, self.entity.y, self.entity)
-            if self.get_event(pygame.K_z, ControlsEventTypes.DOWN):
+                ArrowSpell.new(self)
+            if self.get_event(Controls.attack_3.get_code(), ControlsEventTypes.DOWN):
+                BigFireBallSpell.new(self)
+            if self.get_event(Controls.incline_up.get_code(), ControlsEventTypes.DOWN) and self.entity.incline < 10:
                 self.entity.incline += 1
-            if self.get_event(pygame.K_s, ControlsEventTypes.DOWN):
+            if self.get_event(Controls.incline_down.get_code(), ControlsEventTypes.DOWN) and self.entity.incline > -15:
                 self.entity.incline -= 1
-            if self.get_event(pygame.K_c, ControlsEventTypes.DOWN):
-                Wall(self)
-            if self.get_event(pygame.K_v, ControlsEventTypes.DOWN):
-                Turret(self)
-            if self.get_event(pygame.K_x, ControlsEventTypes.DOWN):
-                # NearTp(self)
-                Bomb(self)
-                # KillAll(self)
-                # TpItems(self)
-            if self.get_event(pygame.K_d, ControlsEventTypes.DOWN):
+            if self.get_event(Controls.spell_1.get_code(), ControlsEventTypes.DOWN):
+                Wall.new(self)
+            if self.get_event(Controls.spell_2.get_code(), ControlsEventTypes.DOWN):
+                Turret.new(self)
+            if self.get_event(Controls.spell_3.get_code(), ControlsEventTypes.DOWN):
+                Bomb.new(self)
+            if self.get_event(Controls.attack_4.get_code(), ControlsEventTypes.DOWN):
                 to_attack = world_util.nearest_entity(self.entity, EntityType.ENEMY)
                 if to_attack is not None:
                     if self.entity.facing == Facing.EAST and self.entity.x + 150 >= to_attack.x >= self.entity.x:
@@ -95,6 +98,21 @@ class Player:
 
     @staticmethod
     def get_by_entity(entity: PlayerEntity) -> Player:
-        for player in get_game().players:
+        for player in get_game().current_level.players:
             if player.entity == entity:
                 return player
+
+    def to_json(self) -> dict:
+        return {"entity": self.entity.to_json(), "inventory": self.inventory.to_json(), "user_id": str(self.user_id), "kills": self.kills}
+
+    @staticmethod
+    def from_json(level: Level, json_dict: dict, player_uuid: str) -> None:
+        player: Player = level.main_player
+        player.user_id = uuid.UUID(json_dict["players"][player_uuid]["user_id"])
+        player.kills = json_dict["players"][player_uuid]["kills"]
+        player.inventory.clear()
+        for item_id in json_dict["players"][player_uuid]["inventory"]:
+            player.inventory.add_item(ItemType.get_by_id(int(item_id)), json_dict["players"][player_uuid]["inventory"][item_id])
+        teleport_level(level, player.entity, level.get_world_by_name(json_dict["players"][player_uuid]["entity"]["world"]), json_dict["players"][player_uuid]["entity"]["x"])
+        player.entity.facing = json_dict["players"][player_uuid]["entity"]["facing"]
+        player.entity.uuid = uuid.UUID(json_dict["players"][player_uuid]["entity"]["uuid"]).hex

@@ -1,13 +1,13 @@
 import time
 
-from core.client import Client
-from core.player import Player
+from pygame import Surface
+
 from core.world import Facing
-from entities.Entity import Entity, EntityType, DamageType
-from entities.livingentities.entity_player import PlayerEntity
+from entities.entity import Entity, DamageType
 from entities.projectiles.projectile import Projectile
-from util import sprites
-from util.instance import get_game
+from util import sprites, audio
+from util.draw_util import draw_with_scroll
+from util.instance import get_game, get_client
 
 
 class BombEntity(Projectile):
@@ -35,15 +35,15 @@ class BombEntity(Projectile):
                 self.x -= self.width
                 self.y += 20
 
-    def draw(self, surface):
+    def draw(self, surface: Surface) -> None:
         if not self.is_explosing:
-            surface.blit(self.sprite_selected, (self.x+Client.get_screen().get_width()//2 + get_game().scroll - get_game().main_player.entity.width//2, self.y))
+            draw_with_scroll(surface, self.sprite_selected, self.x, self.y)
         elif self.is_explosing and round(self.explosion_frame) < len(self.sprites):
-            surface.blit(list(self.sprites.values())[round(self.explosion_frame)], (self.x + Client.get_screen().get_width() // 2 + get_game().scroll - get_game().main_player.entity.width // 2, self.y))
-            self.explosion_frame += 0.2
+            draw_with_scroll(surface, list(self.sprites.values())[round(self.explosion_frame)], self.x, self.y)
+            self.explosion_frame += 0.4
 
     def activity(self):
-        if self.y + self.height + self.gravity_value < Client.get_screen().get_height() - self.world.floor:
+        if self.y + self.height + self.gravity_value < get_client().get_screen().get_height() - self.world.floor:
             self.x += self.motion_x
             self.y += self.gravity_value
             self.gravity_value += self.acceleration
@@ -51,11 +51,11 @@ class BombEntity(Projectile):
             self.explosion_start()
             for entity in self.world.entities:
                 if entity.type != self.type and entity != self:
-                    if self.x - self.width//2 <= entity.x <= self.x + self.width//2 + self.width and self.y - entity.height//4 <= entity.y <= self.y + entity.height:
+                    if self.x - self.width//2 <= entity.x <= self.x + self.width//2 + self.width and self.y - entity.height//4 <= entity.x <= self.y + entity.height:
                         entity.damage(entity.health, DamageType.EXPLOSION, self.author)
-                    elif self.x - self.width//2 - self.width <= entity.x <= self.x + self.width//2 + self.width*2 and self.y - entity.height//2 <= entity.y <= self.y + entity.height:
+                    elif self.x - self.width//2 - self.width <= entity.x <= self.x + self.width//2 + self.width*2 and self.y - entity.height//2 <= entity.x <= self.y + entity.height:
                         entity.damage(50, DamageType.EXPLOSION, self.author)
-                    elif self.x - self.width//2 - self.width - 50 <= entity.x <= self.x + self.width//2 + self.width*2 + 50 and self.y - entity.height <= entity.y <= self.y + entity.height:
+                    elif self.x - self.width//2 - self.width - 50 <= entity.x <= self.x + self.width//2 + self.width*2 + 50 and self.y - entity.height <= entity.x <= self.y + entity.height:
                         entity.damage(30, DamageType.EXPLOSION, self.author)
         if self.is_explosing and not round(self.explosion_frame) < len(self.sprites):
             self.death()
@@ -71,3 +71,6 @@ class BombEntity(Projectile):
             if self.max_width < self.sprites[sprite].get_width():
                 self.max_width = self.sprites[sprite].get_width()
         self.is_explosing = True
+        from entities.livingentities.entity_player import PlayerEntity
+        if isinstance(self.author, PlayerEntity):
+            audio.play_song("explosion.wav")

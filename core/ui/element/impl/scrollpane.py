@@ -1,6 +1,5 @@
 import pygame
 
-from core.game import Game
 from core.ui.element.element import Element
 from util.instance import get_game
 
@@ -28,9 +27,9 @@ class ScrollPane(Element):
             for input_ in inputs.raw_inputs:
                 if input_.type == pygame.MOUSEWHEEL:
                     if input_.y == -1 and self.can_scroll_down:
-                        self.scroll += input_.y * 10
+                        self.scroll += input_.y * 20
                     elif input_.y == 1 and self.can_scroll_up:
-                        self.scroll += input_.y * 10
+                        self.scroll += input_.y * 20
             for elem in self.elems:
                 elem.y += self.scroll
                 elem.rectangle = pygame.Rect(elem.x, elem.y, elem.width, elem.height)
@@ -46,7 +45,7 @@ class ScrollPane(Element):
     def hover(self) -> int | None:
         for elem in self.elems:
             if elem.y <= self.height + self.y and elem.y + elem.height >= self.y:
-                if elem.hover() is not None and get_game().actual_menu is not None:
+                if elem.hover() is not None and get_game().current_menu is not None:
                     if pygame.mouse.get_cursor() != elem.hover():
                         return elem.hover()
         return None

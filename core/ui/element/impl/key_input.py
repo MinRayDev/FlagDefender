@@ -8,7 +8,6 @@ from util.fonts import Fonts
 from util.input.controls import Controls, Mouse, Inputs
 
 
-
 class KeyInput(Element):
     def __init__(self, base_value: str, x: int | str, y: int | str, width: int, height: int, color: tuple[int, int, int], code, background_color: tuple[int, int, int] = Colors.white):
         super().__init__(x, y, width, height, None)
@@ -72,11 +71,8 @@ class KeyInput(Element):
         t = False
         for elem_ in inputs.raw_inputs:
             if elem_.type == pygame.KEYDOWN:
-                print(elem_)
                 self.value = pygame.key.name(elem_.key)
-                print(self.code)
                 if Controls.code_exists(self.code) and elem_.key != Controls.from_code(self.code).get_key():
-                    print('aaa')
                     Controls.change_key(elem_.key, self.code)
                     t = True
         if t:

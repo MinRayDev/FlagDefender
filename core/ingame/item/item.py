@@ -1,0 +1,82 @@
+from core.world import Facing
+from entities.entity import EntityType
+from entities.item import ItemEntity
+from entities.world_objects.big_wall_entity import BigWallEntity
+from entities.world_objects.turret_entity import TurretEntity
+from entities.world_objects.wall_entity import WallEntity
+from util.instance import get_game
+from util.world_util import get_entities_in_area, teleport
+
+
+class ItemUsage:
+
+    @staticmethod
+    def wall_use() -> WallEntity:
+        author = get_game().current_level.main_player
+        match author.entity.facing:
+            case Facing.EAST:
+                if len(get_entities_in_area((author.entity.x + author.entity.width + 10, None),
+                                            (author.entity.x + author.entity.width + 10 + 100, None),
+                                            author.entity.world)) == 0:
+                    wall_entity = WallEntity(0, 0, author.entity.world)
+                    wall_entity.x = author.entity.x + author.entity.width + 10
+                    return wall_entity
+            case Facing.WEST:
+                if len(get_entities_in_area((author.entity.x - 100 - 10, None),
+                                            (author.entity.x - 10, None),
+                                            author.entity.world)) == 0:
+                    wall_entity = WallEntity(0, 0, author.entity.world)
+                    wall_entity.x = author.entity.x - wall_entity.width - 10
+                    return wall_entity
+
+    @staticmethod
+    def big_wall_use() -> BigWallEntity:
+        author = get_game().current_level.main_player
+        match author.entity.facing:
+            case Facing.EAST:
+                if len(get_entities_in_area((author.entity.x + author.entity.width + 10, None),
+                                            (author.entity.x + author.entity.width + 10 + 100, None),
+                                            author.entity.world)) == 0:
+                    big_wall_entity: BigWallEntity = BigWallEntity(0, 0, author.entity.world)
+                    big_wall_entity.x = author.entity.x + author.entity.width + 10
+                    return big_wall_entity
+            case Facing.WEST:
+                if len(get_entities_in_area((author.entity.x - 100 - 10, None),
+                                            (author.entity.x - 10, None),
+                                            author.entity.world)) == 0:
+                    big_wall_entity = BigWallEntity(0, 0, author.entity.world)
+                    big_wall_entity.x = author.entity.x - big_wall_entity.width - 10
+                    return big_wall_entity
+
+    @staticmethod
+    def turret_use() -> TurretEntity:
+        author = get_game().current_level.main_player
+        match author.entity.facing:
+            case Facing.EAST:
+                if len(get_entities_in_area((author.entity.x + author.entity.width + 10, None),
+                                            (author.entity.x + author.entity.width + 10 + 100, None),
+                                            author.entity.world)) == 0:
+                    turret_entity = TurretEntity(0, 0, author.entity.world)
+                    turret_entity.x = author.entity.x + author.entity.width + 10
+                    return turret_entity
+            case Facing.WEST:
+                if len(get_entities_in_area((author.entity.x - 100 - 10, None),
+                                            (author.entity.x - 10, None),
+                                            author.entity.world)) == 0:
+                    turret_entity = TurretEntity(0, 0, author.entity.world)
+                    turret_entity.x = author.entity.x - turret_entity.width - 10
+                    return turret_entity
+
+    @staticmethod
+    def kill_all() -> None:
+        author = get_game().current_level.main_player
+        for entity in author.entity.world.entities.copy():
+            if entity.type == EntityType.ENEMY:
+                entity.death()
+
+    @staticmethod
+    def tp_all() -> None:
+        author = get_game().current_level.main_player
+        for entity in author.entity.world.entities:
+            if isinstance(entity, ItemEntity):
+                teleport(entity, author.entity.world, author.entity.x)

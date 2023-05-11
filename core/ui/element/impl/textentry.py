@@ -5,10 +5,9 @@ import pygame
 from core.ui.element.element import Element
 from util.colors import Colors
 from util.fonts import Fonts
-from util.input.controls import Controls, Mouse, Inputs
+from util.input.controls import Mouse, Inputs
 
 
-#TODO opti code
 class TextEntry(Element):
     def __init__(self, placeholder: str, x: int | str, y: int | str, width: int, height: int, color: tuple[int, int, int], background_color: tuple[int, int, int] = Colors.white):
         super().__init__(x, y, width, height, None)
@@ -27,7 +26,7 @@ class TextEntry(Element):
         self.unselect: bool = True
         self.has_cursor: bool = True
 
-    def activity(self, inputs) -> None:
+    def activity(self, inputs: Inputs) -> None:
         if self.rectangle.collidepoint(pygame.mouse.get_pos()):
             self.is_hover = True
             if Mouse.left.get_key() in inputs.get_codes():
@@ -48,7 +47,6 @@ class TextEntry(Element):
             pygame.draw.rect(surface, self.background_color, self.rectangle)
         temp_text = 0
         if self.visual_text.get_rect().width > self.rectangle.width:
-
             for i, char in enumerate(self.text):
                 if pygame.font.Font(Fonts.product_sans, self.height).render(self.text[:i] + char, True, self.color).get_rect().width >= self.rectangle.width:
                     temp_text += pygame.font.Font(Fonts.product_sans, self.height).render(char, True, self.color).get_rect().width
@@ -79,8 +77,7 @@ class TextEntry(Element):
                 self.text = self.text[:-1]
             elif elem_.type == pygame.KEYUP and elem_.key == pygame.K_BACKSPACE:
                 self.is_deleting = False
-            elif elem_.type == pygame.KEYDOWN and (
-                    elem_.__dict__["unicode"] == "\x03" or elem_.__dict__["unicode"] == "\x16"):
+            elif elem_.type == pygame.KEYDOWN and (elem_.__dict__["unicode"] == "\x03" or elem_.__dict__["unicode"] == "\x16"):
                 if pygame.scrap.get(pygame.SCRAP_TEXT) is not None:
                     clipboard = pygame.scrap.get(pygame.SCRAP_TEXT).decode("utf-8")[:-1]
                     if len(self.text + clipboard) <= self.limit or self.limit == -1:

@@ -52,5 +52,5 @@ class Slider(Element):
         return self.min + float((abs_value/self.rectangle_line.width)*self.max)
 
     def set_value(self, value: float) -> None:
-        t = ((value- self.min)/self.max)*self.rectangle_line.width
+        t = ((value - self.min)/self.max)*self.rectangle_line.width
         self.rectangle_selector.x = self.rectangle_line.x + t - self.rectangle_selector.width//2

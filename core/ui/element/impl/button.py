@@ -1,4 +1,5 @@
 import pygame
+from pygame import Surface
 
 from core.ui.element.element import Element
 
@@ -12,7 +13,7 @@ class Button(Element):
     def activity(self, inputs) -> None:
         super().activity(inputs)
 
-    def draw(self, surface) -> None:
+    def draw(self, surface: Surface) -> None:
         if self.is_hover:
             pygame.draw.rect(surface, self.hover_color, pygame.Rect(self.x, self.y, self.width, self.height))
         else:

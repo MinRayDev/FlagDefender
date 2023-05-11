@@ -1,9 +1,6 @@
-from typing import List
-
 import pygame
 
 from util.input.controls import Inputs
-
 
 
 class Element:
@@ -11,7 +8,7 @@ class Element:
         from util.instance import get_client
         if isinstance(x, str):
             if x == "CENTER":
-                self.x = get_client().get_screen().get_width()//2 - width//2
+                self.x = get_client().get_screen().get_width() // 2 - width // 2
             else:
                 raise ValueError(f"Invalid x position: {x}")
         else:

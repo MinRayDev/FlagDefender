@@ -1,20 +1,15 @@
 from __future__ import annotations
 
 import pygame
-from catppuccin import Flavour
+from pygame import Surface
 
-from core.client import Client
-from core.ui.element.impl.button_text import ButtonText
 from core.ui.element.impl.key_input import KeyInput
 from core.ui.element.impl.rectangle import Rectangle
 from core.ui.element.impl.scrollpane import ScrollPane
-from core.ui.element.impl.slider import Slider
 from core.ui.element.impl.text import Text
 from core.ui.impl.settings.settings_base import SettingsBaseMenu
-from core.ui.impl.world_menu import WorldMenu
 from util.colors import Colors
 from util.input.controls import Controls
-from util.instance import get_game
 
 
 class ControlSettingsMenu(SettingsBaseMenu):
@@ -27,17 +22,23 @@ class ControlSettingsMenu(SettingsBaseMenu):
         width = self.client.get_screen().get_width()//5
         height = self.client.get_screen().get_height()//13
         y = get_client().get_screen().get_height() // 75 + get_client().get_screen().get_height() // 17 + 7
-        self.sp = ScrollPane(10, y, sw - 20, sh - y*2, Flavour.frappe().base.rgb)
+        self.sp = ScrollPane(10, y, sw - 20, sh - y*2, Colors.base_color)
         for i, control in enumerate(Controls):
-            self.sp.elems.append(KeyInput(pygame.key.name(control.value["keyboard"]["key"]), sw//2 - width//2, y + i * (height+7) + 15, width, height, Flavour.frappe().text.rgb, control.value["keyboard"]["code"], Flavour.frappe().surface1.rgb))
+            if "register" in control.value and control.value["register"] is True:
+                continue
+            self.sp.elems.append(Text(str(control).split(".")[1], sw//2 - width*2, y + i * (height+7) + 15, Colors.text, height))
+            self.sp.elems.append(KeyInput(pygame.key.name(control.value["keyboard"]["key"]), sw//2 - width//2, y + i * (height+7) + 15, width, height, Colors.text, control.value["keyboard"]["code"], Colors.surface1))
         # t = KeyInput("a", sw//2, sh//2, width, height, Flavour.frappe().text.rgb)
         self.elems.insert(0, self.sp)
+        self.elems.insert(1, Rectangle(0, 0, get_client().get_screen().get_width(), self.rect_split.y, Colors.base_color))
+        self.elems.insert(2, Rectangle(0, self.rect_split_2.y + self.rect_split_2.height, get_client().get_screen().get_width(), get_client().get_screen().get_height()-(self.rect_split_2.y + self.rect_split_2.height), Colors.base_color))
         # self.elems.append(Rectangle(0, 0, sw, y, Flavour.frappe().pink.rgb))
 
     def activity(self):
         super().activity()
 
-    def draw(self, surface):
-        pygame.draw.rect(surface, Flavour.frappe().base.rgb, pygame.Rect(0, 0, self.client.get_screen().get_width(), self.client.get_screen().get_height()))
+    def draw(self, surface: Surface) -> None:
+        pygame.draw.rect(surface, Colors.base_color, pygame.Rect(0, 0, surface.get_width(), surface.get_height()))
+
         for elem in self.elems:
             elem.draw(surface)

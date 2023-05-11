@@ -1,21 +1,15 @@
-import pygame.time
 
-from core.client import Client
 from core.world import Facing
-from entities.Entity import Entity
+from entities.entity import Entity
 from entities.projectiles.impl.fireball import Fireball
-from entities.projectiles.projectile import Projectile
-from network.event import EventType
-from util import sprites
 from util.instance import get_client, get_game
 
 
-class RemoteFireball(Fireball): # TDODO
+class RemoteFireball(Fireball):
     def __init__(self, x: int, y: int, author: Entity, target: Entity):
         super().__init__(x, y, author)
         target_x = target.x + target.width//2
         target_y = target.y + target.height//2
-        print(target_x - author.x)
         match self.facing:
             case Facing.EAST:
                 self.x = author.x + author.width
@@ -28,7 +22,7 @@ class RemoteFireball(Fireball): # TDODO
                 self.motion_x = (target_x - self.x)*2 // get_game().TPS
                 self.motion_y = abs((self.y - target_y)*2 // get_game().TPS)
 
-    def activity(self, **kwargs):
+    def activity(self):
         if self.health <= 0:
             self.death()
         self.gravity()
@@ -36,8 +30,7 @@ class RemoteFireball(Fireball): # TDODO
         self.y += self.motion_y
 
         self.do_damage()
-        get_client().send_event(EventType.ENTITY_MOVEMENT, {"x": self.x, "y": self.y, "entity_id": str(self.uuid)})
-        if self.x > Client.get_screen().get_width()*5 or self.x+self.width < 0-Client.get_screen().get_width()*5 or self.y > Client.get_screen().get_height()*5 or self.y + self.height < 0:
+        if self.x > get_client().get_screen().get_width()*5 or self.x+self.width < 0-get_client().get_screen().get_width()*5 or self.y > get_client().get_screen().get_height()*5 or self.y + self.height < 0:
             self.death()
 
     def to_json(self):
@@ -45,7 +38,7 @@ class RemoteFireball(Fireball): # TDODO
 
     @staticmethod
     def from_json(json_dict):
-        fb = Fireball(json_dict["x"], json_dict["y"], get_game().get_entity_by_uuid(json_dict["author_uuid"]))
+        fb = Fireball(json_dict["x"], json_dict["y"], get_game().current_level.get_entity_by_uuid(json_dict["author_uuid"]))
         fb.uuid = json_dict["uuid"]
         fb.source = 1
         return fb

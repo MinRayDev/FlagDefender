@@ -1,7 +1,6 @@
-from pygame import SurfaceType, Surface
+from pygame import Surface
 
 from util.input.controls import Inputs
-
 
 
 class Menu:
@@ -11,10 +10,10 @@ class Menu:
         self.prev = prev
         self.elems = []
 
-    def activity(self, **kwargs):
+    def activity(self):
         pass
 
-    def draw(self, surface):
+    def draw(self, surface: Surface) -> None:
         for elem in self.elems:
             elem.draw(surface)
 

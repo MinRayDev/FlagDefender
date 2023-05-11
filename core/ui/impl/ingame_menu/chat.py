@@ -1,13 +1,12 @@
 import time
 
 import pygame
+from pygame import Surface
 
-from core.chat.chat import MessageType, Message, complete, cmd_complete
-from core.client import Client
+from core.chat.chat import MessageType, Message, cmd_complete, get_cmd_tab_index, item_complete, entity_complete
 from core.ui.element.impl.textentry import TextEntry
 from core.ui.game_menu import GameMenu
-from core.chat.chat import execute, is_command
-from network.event import EventType
+from core.chat.chat import Command
 from util.instance import get_client
 from util.instance import get_game
 
@@ -15,7 +14,7 @@ from util.instance import get_game
 class ChatMenu(GameMenu):
     def __init__(self):
         super().__init__("Chat Menu")
-        self.text_input = TextEntry('', 10, Client.get_screen().get_height()-Client.get_screen().get_height()//20 - 50, 300, 50, (153, 170, 181))
+        self.text_input = TextEntry('', 10, get_client().get_screen().get_height()-get_client().get_screen().get_height()//20 - 50, get_client().get_screen().get_width()/2.5, 50, (153, 170, 181))
         self.text_input.background_color = None
         self.text_input.selected = True
         self.text_input.unselect = False
@@ -25,18 +24,17 @@ class ChatMenu(GameMenu):
         self.message_index = 0
         self.tab_index = 0
         self.to_complete = None
+
     def activity(self):
         inputs = self.get_queue()
         if time.time() > self.init_time + 0.5:
             if pygame.K_RETURN in inputs.get_codes():
                 self.reset_tab()
                 if len(self.text_input.get_text()) > 0:
-                    if is_command(self.text_input.get_text()):
-                        execute(self.text_input.get_text())
+                    if Command.is_command(self.text_input.get_text()):
+                        Command.execute(self.text_input.get_text())
                     else:
                         get_game().chat.write(self.text_input.get_text(), MessageType.SELF, None)
-                        if get_client().online:
-                            get_client().send_event(EventType.CHAT_MESSAGE, self.text_input.get_text())
                     get_game().chat.client_messages.append(Message(self.text_input.get_text(), "(Moi)", MessageType.SELF))
                     get_game().reset_menu()
         if pygame.K_UP in inputs.get_codes():
@@ -65,8 +63,15 @@ class ChatMenu(GameMenu):
                 if word_completed is not None:
                     self.text_input.text = word_completed
                     self.tab_index += 1
-            else:
-                word_completed = complete(self.to_complete, self.tab_index)
+                    if self.tab_index >= get_cmd_tab_index(self.to_complete):
+                        self.tab_index = 0
+            elif self.text_input.get_text().startswith("/give"):
+                word_completed = item_complete(self.to_complete, self.tab_index)
+                if word_completed is not None:
+                    self.text_input.text = " ".join(self.text_input.get_text().split(" ")[:-1]) + " " + word_completed
+                    self.tab_index += 1
+            elif self.text_input.get_text().split(" ")[0] in ["/summon"]:
+                word_completed = entity_complete(self.to_complete, self.tab_index)
                 if word_completed is not None:
                     self.text_input.text = " ".join(self.text_input.get_text().split(" ")[:-1]) + " " + word_completed
                     self.tab_index += 1
@@ -75,7 +80,7 @@ class ChatMenu(GameMenu):
             pass
 
         for elem in self.elems:
-            if elem.hover() is not None and get_game().actual_menu is not None:
+            if elem.hover() is not None and get_game().current_menu is not None:
                 if pygame.mouse.get_cursor() != elem.hover():
                     pygame.mouse.set_cursor(elem.hover())
                     break
@@ -83,7 +88,7 @@ class ChatMenu(GameMenu):
             if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
-    def draw(self, surface):
+    def draw(self, surface: Surface) -> None:
         self.alpha_draw(surface, (32, 32, 32, 163), self.text_input.rectangle)
         for elem in self.elems:
             elem.draw(surface)

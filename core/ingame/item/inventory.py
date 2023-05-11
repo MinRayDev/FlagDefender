@@ -2,8 +2,10 @@ from core.ingame.item.item_type import ItemType
 
 
 class Inventory:
+    content: dict[ItemType, int]
+
     def __init__(self):
-        self.content: dict[ItemType, int] = {}  # key: item, value: count
+        self.content = {}
 
     def __len__(self) -> int:
         return len(self.content.keys())
@@ -42,5 +44,12 @@ class Inventory:
     def can_add_item(self, item: ItemType, count: int) -> bool:
         return self.get_item_count(item) + count <= item.get_stack_limit()
 
-    def clear(self):
+    def clear(self) -> None:
         self.content.clear()
+
+    def to_json(self) -> dict[int, int]:
+        json: dict[int, int] = {}
+        for item in self.content:
+            json[item.get_id()] = self.content[item]
+        return json
+

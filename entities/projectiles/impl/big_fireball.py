@@ -1,13 +1,17 @@
-from core.client import Client
+from pygame import Surface
+
 from core.world import Facing
-from entities.Entity import Entity, DamageType
-from entities.Item import ItemEntity
+from entities.entity import Entity, DamageType
 from entities.projectiles.projectile import Projectile
+from util.draw_util import draw_with_scroll
+from util.instance import get_client
 
 
 class BigFireball(Projectile):
     def __init__(self, x: int, y: int, author: Entity):
-        super().__init__(x, y, sprites_path=r"./resources/sprites/big_fireball", author=author, damage_value=100)
+        super().__init__(x, y, sprites_path=r"./resources/sprites/projectiles/big_fireball", author=author, damage_value=100)
+        self.frame = 0
+        self.start_x = self.x
         match self.facing:
             case Facing.NORTH:
                 self.motion_y = -5
@@ -26,23 +30,27 @@ class BigFireball(Projectile):
                 self.x -= 16
                 self.y += 20
 
-    def activity(self, **kwargs):
+    def draw(self, surface: Surface) -> None:
+        if round(self.frame) < len(self.sprites):
+            draw_with_scroll(surface, list(self.sprites.values())[round(self.frame)], self.x, self.y)
+        else:
+            self.frame = 0
+            draw_with_scroll(surface, list(self.sprites.values())[self.frame], self.x, self.y)
+        self.frame += 0.2
+
+    def activity(self):
         super().activity()
         self.x += self.motion_x
         self.y += self.motion_y
 
         self.do_damage()
-        if self.x > Client.get_screen().get_width()*5 or self.x+self.width < 0-Client.get_screen().get_width()*5 or self.y > Client.get_screen().get_height()*5 or self.y + self.height < 0:
+        if self.x > get_client().get_screen().get_width() * 5 or self.x + self.width < 0 - get_client().get_screen().get_width() * 5 or self.y > get_client().get_screen().get_height() * 5 or self.y + self.height < 0:
+            self.death()
+        if abs(self.x - self.start_x) > 1000:
             self.death()
 
     def do_damage(self):
         for entity in self.world.entities:
-            if entity != self and entity != self.author and not isinstance(entity, ItemEntity):
-                if isinstance(entity, Projectile) and entity.author == self.author:
-                    return
-                if ((entity.x <= self.x <= entity.x + entity.width) or (
-                        entity.x <= self.x + self.width <= entity.x + entity.width)) and (
-                        (entity.y <= self.y <= entity.y + entity.height) or (
-                        entity.y <= self.y + self.height <= entity.y + entity.height)):
-                    self.health -= entity.health
-                    entity.damage(self.damage_value, DamageType.PROJECTILE, self.author)
+            if self.can_damage(entity):
+                self.health -= entity.health
+                entity.damage(self.damage_value, DamageType.PROJECTILE, self.author)
