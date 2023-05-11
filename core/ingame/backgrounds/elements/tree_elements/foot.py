@@ -4,7 +4,7 @@ import random
 
 import pygame
 from pygame import Surface
-from core.ui.impl.ingame_menu.backgrounds.elements.tree_elements.tree_element import TreeElement
+from core.ingame.backgrounds.elements.tree_elements.tree_element import TreeElement
 from core.world import Facing
 from util.sprites import load
 
@@ -75,5 +75,6 @@ class Foot(TreeElement):
         foot.sides_indexes.clear()
         for root in json_dict["roots"]:
             foot.sides_indexes[root] = json_dict["roots"][root]
+
         foot.final_surface = foot.generate_surface()
         return foot

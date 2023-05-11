@@ -1,7 +1,7 @@
 import pygame
 from pygame import Surface
 
-from core.ui.impl.ingame_menu.backgrounds.elements.floor import Floor
+from core.ingame.backgrounds.elements.floor import Floor
 from core.world import World
 from util.instance import get_game
 from util.sprites import load

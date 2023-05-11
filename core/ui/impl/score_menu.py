@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pygame
 from pygame import Surface
 
@@ -6,19 +8,14 @@ from core.ui.element.impl.scrollpane import ScrollPane
 from core.ui.element.impl.text import Text
 from core.ui.menu import Menu
 from util.colors import Colors
+from util.files import get_datas
 from util.instance import get_client
 from util.instance import get_game
 
-rules: list[str] = [
-    "The goal is to survive as many waves as possible by protecting the flag from the monsters.",
-    "b"
 
-]
-
-
-class RulesMenu(Menu):
+class ScoreMenu(Menu):
     def __init__(self, prev):
-        super().__init__("World Menu", prev)
+        super().__init__("Score Menu", prev)
         self.base_color = Colors.base_color
         self.button_base_color = Colors.button_base_color
         self.button_hover_color = Colors.hover_color
@@ -27,8 +24,11 @@ class RulesMenu(Menu):
                              self.base_color)
         x = get_client().get_screen().get_width() // 25
         y = get_client().get_screen().get_height() // 75 + get_client().get_screen().get_height() // 17 + 50
-        for rule in rules:
-            self.sp.elems.append(Text(rule, x, y, self.text_color))
+        scores = sorted(get_datas()["scores"], key=lambda score_: score_["score"])
+        for score in scores:
+            text: Text = Text("1. " + str(score["score"]) + " (" + datetime.fromtimestamp(score["time"]).strftime("%m/%d/%Y, %Hh %Mmin %Ss") + ")", x, y, self.text_color)
+            text.rectangle.x = get_client().get_screen().get_width()//2 - text.rectangle.width//2
+            self.sp.elems.append(text)
             y += 40
         self.back_button = ButtonText(get_client().get_screen().get_width() // 30,
                                       get_client().get_screen().get_height() // 75,

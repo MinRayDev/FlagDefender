@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from typing import Callable
 
 import pygame
 from pygame import Surface
@@ -23,12 +24,16 @@ class LoadingMenu(Menu):
         text_color = Colors.text_color
         self.check_limt = check_limt
         x = get_client().get_screen().get_width() / 2 - (
-                    get_client().get_screen().get_width() - get_client().get_screen().get_width() / 4) / 2
+                get_client().get_screen().get_width() - get_client().get_screen().get_width() / 4) / 2
         y = get_client().get_screen().get_height() - get_client().get_screen().get_height() / 4
         width = get_client().get_screen().get_width() - get_client().get_screen().get_width() / 4
         height = get_client().get_screen().get_height() / 20
-        self.bar_bg_rectangle = Rectangle(x, y, width, height, base_color)
+        self.bar_bg_rectangle = Rectangle(x, y, width, height, Colors.crust)
         self.bar_rectangle = Rectangle(x, y, 0, height, text_color)
+        self.target_bar_width = 0
+
+        self.holder = Holder(ease_out_quint, 50)
+
         self.check_passed = Text(f"Check 0/{check_limt}", x + width, y, text_color)
         self.check_passed.rectangle.x -= self.check_passed.rectangle.width - 10
         self.check_passed.rectangle.y -= (self.check_passed.rectangle.height + 10)
@@ -41,7 +46,7 @@ class LoadingMenu(Menu):
         inputs = self.get_queue()
         for elem in self.elems:
             elem.activity(inputs)
-            pass
+
         for elem in self.elems:
             if elem.hover() is not None and get_game().current_menu is not None:
                 if pygame.mouse.get_cursor() != elem.hover():
@@ -50,8 +55,13 @@ class LoadingMenu(Menu):
         else:
             if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-        self.bar_rectangle.rectangle.width = self.bar_bg_rectangle.width * (len(self.checks)/self.check_limt)
-        self.bar_rectangle.width = self.bar_bg_rectangle.width * (len(self.checks)/self.check_limt)
+
+        old_width = self.target_bar_width
+        self.target_bar_width = self.bar_bg_rectangle.width * (len(self.checks) / self.check_limt)
+
+        self.bar_rectangle.rectangle.width = self.target_bar_width
+        self.bar_rectangle.width = self.target_bar_width
+
         self.check_passed.change(f"Check {len(self.checks)}/{self.check_limt}")
         if len(self.checks) > 0:
             self.current_check.change(f"{self.checks[-1][1]} ({self.checks[-1][2]})")
@@ -59,8 +69,8 @@ class LoadingMenu(Menu):
             if self.end_time == 0:
                 self.end_time = time.time()
             elif has_elapsed(self.end_time, 0.5):
-                print("----------------------------------------------------------------")
                 get_game().reset_menu()
+        self.holder.update()
 
     def draw(self, surface: Surface) -> None:
         pygame.draw.rect(surface, Colors.base_color,
@@ -75,3 +85,33 @@ class LoadingMenu(Menu):
 
     def append_check(self, index: int, name: str, source: str):
         self.checks.append((index, name, source))
+
+
+class Holder:
+    def __init__(self, func: Callable[[float], float], total: int = 100):
+        self.__func = func
+        self.__value = 0
+        self.__total = total
+
+    def update(self):
+        if self.__value >= self.__total: return
+        self.__value += 1
+
+    @property
+    def percentage(self):
+        return self.__value / self.__total
+
+    @property
+    def translated_percentage(self):
+        return self.__func(self.percentage)
+
+    @property
+    def value(self) -> int:
+        return self.__value
+
+    def reset(self):
+        self.__value = 0
+
+
+def ease_out_quint(percentage: float) -> float:
+    return 1 - (1. - percentage) ** 5

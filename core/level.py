@@ -20,8 +20,8 @@ class Level:
     def __init__(self, name: str, loading: bool = False):
         from util.instance import get_client
         from core.player import Player
-        from core.ui.impl.ingame_menu.backgrounds.hell_background import HellBackground
-        from core.ui.impl.ingame_menu.backgrounds.overworld_background import OverworldBackground
+        from core.ingame.backgrounds.hell_background import HellBackground
+        from core.ingame.backgrounds.overworld_background import OverworldBackground
         from core.world import World, Facing
         from entities.world_objects.flag import Flag
         from util.world_util import summon
@@ -32,7 +32,7 @@ class Level:
         add_check("Creating values.", __name__ + "Level.init")
         self.players: list[Player] = []
         self.scroll: int = 0
-        self.day_duration = 10 * 60
+        self.day_duration = 60*10
         self.day_start = 0
         self.main_player: Optional[Player] = None
         self.skycolor_alpha = 0
@@ -104,7 +104,9 @@ class Level:
     def game_over(self):
         from core.ui.impl.game_over import GameOverMenu
         datas = files.get_datas()
-        datas["score"].append({"score"})
+        score: int = self.main_player.kills + self.round_manager.round.number*4
+        datas["scores"].append({"score": score, "time": time.time()})
+        files.write_datas(datas)
         get_game().instance.set_menu(GameOverMenu(self.main_player.kills, self.round_manager.round.number))
 
     def save(self) -> None:
@@ -142,11 +144,9 @@ class Level:
             Player.from_json(level, json_dict, player)
         add_check("Loading worlds.", __name__ + ".load", 1)
         for world_name in json_dict["worlds"]:
-            print(world_name)
             world = level.get_world_by_name(world_name)
             # world.entities.clear()
             for entity in json_dict["worlds"][world_name]["entities"]:
-                print('.'.join(entity["entity_type"].split(".")[:-1]), entity["entity_type"].split(".")[-1])
                 module = __import__('.'.join(entity["entity_type"].split(".")[:-1]), globals(), locals(), entity["entity_type"].split(".")[-1])
                 # print(module)
                 class_ = getattr(module, entity["entity_type"].split(".")[-1])
@@ -162,10 +162,10 @@ class Level:
                     entity_ = class_(entity["x"], entity["y"], world)
                     entity_.health = entity["health"]
                 entity_.uuid = uuid.UUID(str(entity["uuid"]))
-                if world_name == "overworld":
-                    from core.ui.impl.ingame_menu.backgrounds.overworld_background import OverworldBackground
-                    world.set_background(OverworldBackground.from_json(json_dict, level))
                 level.round_manager.round.mobs.append(entity_)
+            if world_name == "overworld":
+                from core.ingame.backgrounds.overworld_background import OverworldBackground
+                world.set_background(OverworldBackground.from_json(json_dict, level))
         level.day_start = time.time()-json_dict["delta_time"]
         add_check("Loading is complete", __name__ + ".load", 1)
         level.round_manager.start()

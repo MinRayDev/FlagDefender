@@ -1,6 +1,6 @@
 from pygame import Surface
 
-from core.ui.impl.ingame_menu.background import Background
+from core.ingame.background import Background
 from core.world import World
 from util.instance import get_game, get_client
 

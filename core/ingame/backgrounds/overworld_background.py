@@ -5,14 +5,14 @@ import time
 from pygame import Surface
 from typing import TYPE_CHECKING
 
-from core.ui.impl.ingame_menu.backgrounds.elements.cloud import Cloud
+from core.ingame.backgrounds.elements.cloud import Cloud
 from util.draw_util import draw_with_scroll
 
 if TYPE_CHECKING:
     from core.level import Level
-from core.ui.impl.ingame_menu.background import Background
-from core.ui.impl.ingame_menu.backgrounds.elements.floor import Floor
-from core.ui.impl.ingame_menu.backgrounds.elements.tree import Tree
+from core.ingame.background import Background
+from core.ingame.backgrounds.elements.floor import Floor
+from core.ingame.backgrounds.elements.tree import Tree
 from core.world import World
 from util.instance import get_game, get_client
 from util.sprites import load
@@ -39,7 +39,7 @@ class OverworldBackground(Background):
         self.last_time = 0
         self.last_sprite = 2
         self.night_color = self.sky_color
-        surface = get_client().screen
+        surface = get_client().get_screen()
         add_check("Resizing background's sprites.", __name__ + "OverworldBackground.init")
         self.parts = [
             self.resize(self.sprites["0"], surface.get_width()),
@@ -107,14 +107,16 @@ class OverworldBackground(Background):
                 return clouds
 
     def generate_trees(self) -> list[tuple[Tree, int]]:
-        x = -self.world.size[0] + 300
+        # x = -self.world.size[0] + 500
+        x = -700
         trees: list[tuple[Tree, int]] = []
         while True:
             tree: Tree = Tree()
             if not -300 < x < 300:
                 trees.append((tree, x))
             x += random.randint(int(tree.get_surface().get_width() // 1.4), int(tree.get_surface().get_width() * 2.2))
-            if x > self.world.size[0] - 300:
+            # if x > self.world.size[0] - 500:
+            if x > 700:
                 return trees
 
     def draw_sky(self, surface: Surface) -> None:
@@ -172,6 +174,7 @@ class OverworldBackground(Background):
 
     @staticmethod
     def from_json(json_dict: dict, level: 'Level') -> OverworldBackground:
+        print("AHOUGA")
         background = OverworldBackground(level.worlds[0], True)
         floor: Floor = Floor(r"./resources/sprites/world/background/floor", level.worlds[0].size[0]*2, level.worlds[0].floor, True)
         floor.maps = json_dict["worlds"]["overworld"]["background"]["floor"]
@@ -185,5 +188,6 @@ class OverworldBackground(Background):
         # Loading trees
         background.floor = floor
         for x in json_dict["worlds"]["overworld"]["background"]["trees"]:
+            print(x)
             background.trees.append((Tree.from_json(json_dict["worlds"]["overworld"]["background"]["trees"][x]), int(x)))
         return background

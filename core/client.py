@@ -24,10 +24,11 @@ class Client:
         self.run: bool = True
         self.online: bool = False
         self.controllers: list[Controller] = []
-        self.volume = 100
+
         self.init_files()
         self.load_settings()
         self.datas = files.get_datas()
+        self.volume = self.datas["volume"]
         self.id = self.datas["client_id"]
         self.controllers.append(Controller(Sources.keyboard))
         self.controllers.append(Controller(Sources.mouse))
@@ -60,7 +61,7 @@ class Client:
             settings.write_settings(files.get_settings_file())
         if not files.file_exists(files.get_data_file()):
             files.create_data_file()
-            files.write_datas({"client_id": str(base64.b64encode(str(uuid.uuid4()).encode("utf-8")).decode("utf-8")), "user_id": str(uuid.uuid4()), "scores": []})
+            files.write_datas({"client_id": str(base64.b64encode(str(uuid.uuid4()).encode("utf-8")).decode("utf-8")), "user_id": str(uuid.uuid4()), "scores": [], "volume": 100})
 
     @classmethod
     def load_settings(cls):

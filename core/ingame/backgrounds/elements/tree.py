@@ -5,9 +5,9 @@ import random
 import pygame
 from pygame import Surface
 
-from core.ui.impl.ingame_menu.backgrounds.elements.tree_elements.body import Body
-from core.ui.impl.ingame_menu.backgrounds.elements.tree_elements.foot import Foot
-from core.ui.impl.ingame_menu.backgrounds.elements.tree_elements.head import Head
+from core.ingame.backgrounds.elements.tree_elements.body import Body
+from core.ingame.backgrounds.elements.tree_elements.foot import Foot
+from core.ingame.backgrounds.elements.tree_elements.head import Head
 
 
 class Tree:
@@ -77,8 +77,6 @@ class Tree:
 
     @staticmethod
     def from_json(json_dict: dict) -> Tree:
-        print(
-            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         print(json_dict)
         tree: Tree = Tree(True)
         tree.is_dead = json_dict["is_dead"]

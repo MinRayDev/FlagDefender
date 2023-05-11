@@ -7,6 +7,7 @@ from core.ui.element.impl.slider import Slider
 from core.ui.element.impl.text import Text
 from core.ui.impl.settings.settings_base import SettingsBaseMenu
 from util.colors import Colors
+from util.files import write_datas, get_datas
 
 
 class GeneralSettingsMenu(SettingsBaseMenu):
@@ -31,7 +32,11 @@ class GeneralSettingsMenu(SettingsBaseMenu):
     def activity(self):
         super().activity()
         self.slider_text.change(str(int(self.slider_volume.get())))
-        self.client.volume = self.slider_volume.get()
+        if self.client.volume != int(self.slider_volume.get()):
+            self.client.volume = self.slider_volume.get()
+            datas = get_datas()
+            datas["volume"] = self.slider_volume.get()
+            write_datas(datas)
 
     def draw(self, surface: Surface) -> None:
         pygame.draw.rect(surface, Colors.base_color, pygame.Rect(0, 0, surface.get_width(), self.client.get_screen().get_height()))

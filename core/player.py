@@ -32,6 +32,7 @@ class Player:
         self.kills = 0
         self.user_id = get_client().datas["user_id"]
         self.cooldowns = {}
+        self.death = 0
 
     def get_controls(self, events):
         for control in self.controller.get_active_controls(pygame.key.get_pressed()):

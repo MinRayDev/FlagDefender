@@ -31,19 +31,19 @@ class World:
     def to_json(self) -> dict:
         world = {"entities": []}
         from entities.entity import Entity
+        from entities.livingentities.entity_player import PlayerEntity
+        from entities.projectiles.projectile import Projectile
+        from entities.world_objects.entity_mountain import Mountain
+        from entities.world_objects.flag import Flag
+        from entities.world_objects.portal import PortalEntity
         entity: Entity
         for entity in self.entities:
-            from entities.livingentities.entity_player import PlayerEntity
-            from entities.projectiles.projectile import Projectile
-            from entities.world_objects.entity_mountain import Mountain
-            from entities.world_objects.flag import Flag
-            from entities.world_objects.portal import PortalEntity
             if not isinstance(entity, PlayerEntity) and not isinstance(entity, Projectile) and not isinstance(entity, Mountain) and not isinstance(entity, Flag) and not isinstance(entity, PortalEntity):
                 world["entities"].append(entity.to_json())
-        from core.ui.impl.ingame_menu.backgrounds.overworld_background import OverworldBackground
+        from core.ingame.backgrounds.overworld_background import OverworldBackground
         if isinstance(self.background, OverworldBackground):
             try:
                 world["background"] = self.background.to_json()
             except:
-                traceback.print_exc()
+                pass
         return world

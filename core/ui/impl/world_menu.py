@@ -42,6 +42,7 @@ class CreateNewWorld(Element):
         self.text_entry = TextEntry("World Name", "CENTER", self.s_height // 2 - (self.s_height // 16) // 2 - 7,
                                     self.s_width // 4, self.s_height // 16, Colors.text,
                                     Colors.surface1)
+        self.text_entry.limit = 20
         self.intern_elems: list[Element] = [self.rect, self.text_entry]
 
     def activity(self, inputs: Inputs) -> None:
@@ -53,9 +54,9 @@ class CreateNewWorld(Element):
         elif pygame.K_RETURN in inputs.get_codes():
             try:
                 # loading screen
-                level = Level(self.text_entry.text)
                 f = open(os.path.join(files.get_save_path(), self.text_entry.text + ".json"), "x")
                 f.close()
+                level = Level(self.text_entry.text)
                 level.save()
                 self.parent.saves = {}
                 for i, save in enumerate(files.get_saves()):
@@ -113,8 +114,7 @@ class WorldMenu(Menu):
                           Colors.mantle)
         elem1 = Rectangle(0, 0, get_client().get_screen().get_width(), 10, self.base_color)
         elem2 = Rectangle(0, 0, 10, self.sp.height + self.sp.y, self.base_color)
-        elem3 = Rectangle(self.sp.width + self.sp.x, 0, 10, self.sp.height + self.sp.y,
-                          self.base_color)  # TODO, double click pour load
+        elem3 = Rectangle(self.sp.width + self.sp.x, 0, 10, self.sp.height + self.sp.y, self.base_color)
         # self.load_button = ButtonText(get_client().get_screen().get_width()/16, get_client().get_screen().get_height() - 180, get_client().get_screen().get_width()/4, 70, "Load", button_base_color, text_color, button_hover_color)
         base_x = get_client().get_screen().get_width() // 7
         base_y = get_client().get_screen().get_height() - get_client().get_screen().get_height() // 6
@@ -138,6 +138,8 @@ class WorldMenu(Menu):
         self.new_creation: bool = False
 
     def activity(self):
+        if not self.new_creation:
+            super().activity()
         inputs = self.get_queue()
         if not self.new_creation:
             for elem in self.elems:
@@ -159,10 +161,10 @@ class WorldMenu(Menu):
                     elif elem.has_been_clicked and self.selected_button == elem:
                         # load screen
                         # TODO loading screen
-                        get_game().set_menu(LoadingMenu(self, 49, "Initiating game."))
+                        get_game().set_menu(LoadingMenu(self, 33, "Initiating game."))
                         # time.sleep(1)
                         threading.Thread(target=load_and_set_level,
-                                         args=(elem.text_content, self.saves[elem.text_content],),
+                                         args=(elem.text_content, self.saves[elem.text_content], self),
                                          daemon=True).start()
 
                         # get_game().reset_menu()
@@ -193,14 +195,15 @@ class WorldMenu(Menu):
     def delete(self):
         if self.selected_button is not None and os.path.exists(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json")):
             os.remove(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json"))
+            info(self, f"The save '{self.selected_button.text_content}' has been successfully deleted.")
         self.reload()
-        info(self, f"The save '{self.selected_button.text_content}' has been successfully deleted.")
+
 
     def duplicate(self):
         if self.selected_button is not None:
             shutil.copyfile(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json"),
                             os.path.join(files.get_save_path(), self.selected_button.text_content + " - Copy.json"))
-        info(self, f"The save '{self.selected_button.text_content}' has been successfully duplicated.")
+            info(self, f"The save '{self.selected_button.text_content}' has been successfully duplicated.")
         self.reload()
 
     def reload(self):

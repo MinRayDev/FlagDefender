@@ -5,6 +5,7 @@ from pygame import Surface
 
 from core.ui.element.impl.button_text import ButtonText
 from core.ui.impl.rules_menu import RulesMenu
+from core.ui.impl.score_menu import ScoreMenu
 from core.ui.impl.settings.general_settings import GeneralSettingsMenu
 from core.ui.impl.world_menu import WorldMenu
 from core.ui.menu import Menu
@@ -35,8 +36,8 @@ class MainMenu(Menu):
         self.solo_button.click = lambda: get_game().set_menu(WorldMenu(self))
         self.solo_button.hover_color = hover_color
 
-        self.multi_button = ButtonText("CENTER", get_client().get_screen().get_height()//2-80-40 - space, width_base, 80, "Multiplayer", base_color, text_color)
-        self.multi_button.click = lambda: None
+        self.multi_button = ButtonText("CENTER", get_client().get_screen().get_height()//2-80-40 - space, width_base, 80, "Scores", base_color, text_color)
+        self.multi_button.click = lambda: get_game().set_menu(ScoreMenu(self))
         self.multi_button.hover_color = hover_color
 
         self.rules_button = ButtonText("CENTER", "CENTER", width_base, 80, "Rules", base_color, text_color)

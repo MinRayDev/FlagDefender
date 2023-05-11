@@ -38,9 +38,8 @@ class InventoryMenu(GameMenu):
                 self.rectangles.append(pygame.Rect(x_base + i * (base + screen_width//150), y_base + j * (base + screen_height//100), base, base))
 
     def activity(self):
+        super().activity()
         inputs = self.get_queue()
-        if pygame.K_ESCAPE in inputs.get_codes():
-            get_game().reset_menu()
         for elem in self.elems:
             elem.activity(inputs)
             pass

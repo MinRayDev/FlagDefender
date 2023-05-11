@@ -7,7 +7,7 @@ from entities.entity import Entity, DamageType
 from entities.projectiles.projectile import Projectile
 from util import sprites, audio
 from util.draw_util import draw_with_scroll
-from util.instance import get_game, get_client
+from util.instance import get_client
 
 
 class BombEntity(Projectile):

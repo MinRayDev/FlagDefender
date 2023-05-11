@@ -66,6 +66,7 @@ class SettingsBaseMenu(Menu):
         self.elems = [self.general_button, self.control_button, self.back_button, self.rect_split, self.rect_split_2, self.client_id_text, self.game_version_text]
 
     def activity(self):
+        super().activity()
         inputs = self.get_queue()
         for elem in self.elems:
             elem.activity(inputs)

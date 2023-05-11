@@ -1,6 +1,8 @@
+import pygame
 from pygame import Surface
 
 from util.input.controls import Inputs
+from util.instance import get_game
 
 
 class Menu:
@@ -11,7 +13,12 @@ class Menu:
         self.elems = []
 
     def activity(self):
-        pass
+        inputs = self.get_queue(False)
+        if pygame.K_ESCAPE in inputs.get_codes():
+            if self.prev is not None:
+                get_game().set_menu(self.prev)
+            else:
+                get_game().reset_menu()
 
     def draw(self, surface: Surface) -> None:
         for elem in self.elems:
@@ -25,7 +32,8 @@ class Menu:
         if element not in self.inputs_queue.raw_inputs:
             self.inputs_queue.raw_add(element)
 
-    def get_queue(self):
+    def get_queue(self, reset: bool = True):
         temp = self.inputs_queue.copy()
-        self.inputs_queue = Inputs()
+        if reset:
+            self.inputs_queue = Inputs()
         return temp

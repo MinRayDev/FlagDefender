@@ -55,10 +55,7 @@ class ItemType(enum.Enum):
     @staticmethod
     def get_by_id(item_id: int) -> Optional[ItemType]:
         for item in ItemType:
-            print(item.get_id(), item_id)
-            print(item.get_id(), item_id)
             if item.get_id() == item_id:
-                print("aaaa")
                 return item
 
     @staticmethod

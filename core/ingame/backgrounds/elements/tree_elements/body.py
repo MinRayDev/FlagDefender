@@ -6,9 +6,9 @@ from typing import Generator, Any
 import pygame
 from pygame import Surface
 
-from core.ui.impl.ingame_menu.backgrounds.elements.tree_elements.branch import Branch
-from core.ui.impl.ingame_menu.backgrounds.elements.tree_elements.tree_element import TreeElement
-from core.ui.impl.ingame_menu.backgrounds.elements.tree_elements.trunk import Trunk
+from core.ingame.backgrounds.elements.tree_elements.branch import Branch
+from core.ingame.backgrounds.elements.tree_elements.tree_element import TreeElement
+from core.ingame.backgrounds.elements.tree_elements.trunk import Trunk
 from core.world import Facing
 
 

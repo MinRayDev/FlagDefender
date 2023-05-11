@@ -51,6 +51,8 @@ class Game:
         return level
 
     def set_level(self, level: Level) -> None:
+        if level is None:
+            print("Attempted to set level to None")
         self.levels.append(level)
         self.current_level = level
 
