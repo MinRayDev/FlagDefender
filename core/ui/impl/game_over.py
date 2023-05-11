@@ -13,6 +13,7 @@ from util.instance import get_game
 class GameOverMenu(Menu):
     def __init__(self, kills: int, rounds: int):
         super().__init__("Game Over", None)
+        print("Game over reset uwu")
         get_game().reset_level()
         self.base_color = Colors.base_color
         self.button_base_color = Colors.button_base_color

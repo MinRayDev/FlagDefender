@@ -52,11 +52,12 @@ class Game:
 
     def set_level(self, level: Level) -> None:
         if level is None:
-            print("Attempted to set level to None")
+            print("Attempted to set level to None, prefer using #reset_level()")
         self.levels.append(level)
         self.current_level = level
 
     def reset_level(self) -> None:
+        print("Reset level")
         self.levels.clear()
         self.current_level = None
 
@@ -78,17 +79,18 @@ class Game:
                         for entity_ in world.entities:
                             if not isinstance(entity_, PlayerEntity) and entity_.source == 0:
                                 entity_.activity()
-                for player_ in self.current_level.players:
-                    player_.activity()
-                    player_.entity.activity(keys=player_.keys, events=player_.events)
-                    player_.reset_queues()
-                    break
-                if self.current_level.round_manager.round.is_finished():
-                    if self.current_level.round_manager.round.end_time == 0:
-                        self.current_level.round_manager.round.end_time = time.time()
-                    if has_elapsed(self.current_level.round_manager.round.end_time, 5):
-                        if self.current_level.round_manager.can_summon:
-                            self.current_level.round_manager.next_round()
+                if self.current_level is not None:
+                    for player_ in self.current_level.players:
+                        player_.activity()
+                        player_.entity.activity(keys=player_.keys, events=player_.events)
+                        player_.reset_queues()
+                        break
+                    if self.current_level.round_manager.round.is_finished():
+                        if self.current_level.round_manager.round.end_time == 0:
+                            self.current_level.round_manager.round.end_time = time.time()
+                        if has_elapsed(self.current_level.round_manager.round.end_time, 5):
+                            if self.current_level.round_manager.can_summon:
+                                self.current_level.round_manager.next_round()
 
     def render(self, surface: Surface) -> None:
         from core.ui.game_menu import GameMenu

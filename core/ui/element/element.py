@@ -20,13 +20,31 @@ class Element:
                 raise ValueError(f"Invalid x position: {x}")
         else:
             self.y: int = y
-        self.width: int = width
-        self.height: int = height
+        self.__width: int = width
+        self.__height: int = height
         self.is_hover: bool = False
         if rectangle is not None:
             self.rectangle: pygame.Rect = rectangle
         else:
             self.rectangle: pygame.Rect = pygame.Rect(self.x, self.y, width, height)
+
+    @property
+    def width(self) -> int:
+        return self.__width
+
+    @property
+    def height(self) -> int:
+        return self.__height
+
+    @width.setter
+    def width(self, value: int):
+        self.__width = value
+        # self.rectangle
+
+    @height.setter
+    def height(self, value: int):
+        self.__height = value
+        # self.cjsoighjwerio
 
     def activity(self, inputs: Inputs) -> None:
         if self.rectangle.collidepoint(pygame.mouse.get_pos()):

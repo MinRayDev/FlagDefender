@@ -55,6 +55,7 @@ class EscMenu(GameMenu):
         def leave():
             get_game().set_menu(MainMenu())
             time.sleep(0.02)
+            print("LEAVE")
             get_game().reset_level()
 
         self.leave_button.click = lambda: leave()

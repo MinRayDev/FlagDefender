@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import time
 from typing import Callable
 
@@ -30,9 +31,8 @@ class LoadingMenu(Menu):
         height = get_client().get_screen().get_height() / 20
         self.bar_bg_rectangle = Rectangle(x, y, width, height, Colors.crust)
         self.bar_rectangle = Rectangle(x, y, 0, height, text_color)
-        self.target_bar_width = 0
 
-        self.holder = Holder(ease_out_quint, 50)
+        self.anim_holder = AnimationHolder(ease_out_circ, 0)
 
         self.check_passed = Text(f"Check 0/{check_limt}", x + width, y, text_color)
         self.check_passed.rectangle.x -= self.check_passed.rectangle.width - 10
@@ -56,11 +56,11 @@ class LoadingMenu(Menu):
             if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
-        old_width = self.target_bar_width
-        self.target_bar_width = self.bar_bg_rectangle.width * (len(self.checks) / self.check_limt)
+        target_bar_width = self.bar_bg_rectangle.width * (len(self.checks) / self.check_limt)
+        self.anim_holder.target = target_bar_width * (len(self.checks) / self.check_limt)
 
-        self.bar_rectangle.rectangle.width = self.target_bar_width
-        self.bar_rectangle.width = self.target_bar_width
+        self.bar_rectangle.rectangle.width = self.anim_holder.translated_percentage
+        self.bar_rectangle.width = self.anim_holder.translated_percentage
 
         self.check_passed.change(f"Check {len(self.checks)}/{self.check_limt}")
         if len(self.checks) > 0:
@@ -70,12 +70,12 @@ class LoadingMenu(Menu):
                 self.end_time = time.time()
             elif has_elapsed(self.end_time, 0.5):
                 get_game().reset_menu()
-        self.holder.update()
 
     def draw(self, surface: Surface) -> None:
         pygame.draw.rect(surface, Colors.base_color,
                          pygame.Rect(0, 0, self.client.get_screen().get_width(), self.client.get_screen().get_height()))
         super().draw(surface)
+        self.anim_holder.update()
 
     def end(self):
         get_game().set_menu(self.prev)
@@ -87,27 +87,40 @@ class LoadingMenu(Menu):
         self.checks.append((index, name, source))
 
 
-class Holder:
-    def __init__(self, func: Callable[[float], float], total: int = 100):
+class AnimationHolder:
+    def __init__(self, func: Callable[[float], float], target: int = 100):
         self.__func = func
         self.__value = 0
-        self.__total = total
+        self.__target = target
 
     def update(self):
-        if self.__value >= self.__total: return
-        self.__value += 1
+        if self.__value >= self.__target:
+            return
+        self.__value += 5
+        if self.__value > self.__target:
+            self.__value = self.__target
 
     @property
     def percentage(self):
-        return self.__value / self.__total
+        if self.__target == 0:
+            return 0
+        return self.__value / self.__target
 
     @property
     def translated_percentage(self):
-        return self.__func(self.percentage)
+        return self.__func(self.percentage) * self.__target
 
     @property
     def value(self) -> int:
         return self.__value
+
+    @property
+    def target(self) -> int:
+        return self.__target
+
+    @target.setter
+    def target(self, value: int):
+        self.__target = value
 
     def reset(self):
         self.__value = 0
@@ -115,3 +128,7 @@ class Holder:
 
 def ease_out_quint(percentage: float) -> float:
     return 1 - (1. - percentage) ** 5
+
+
+def ease_out_circ(percentage: float) -> float:
+    return math.sqrt(1 - (percentage - 1) ** 2)
