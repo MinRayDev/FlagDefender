@@ -27,6 +27,8 @@ class HUD(GameMenu):
         pygame.draw.rect(surface, Colors.red, pygame.Rect(self.health_rect_base.x, self.height - self.height//30 - self.height//50, int((self.width//8)*health_percentage), self.height//30))
         Text("Kills: " + str(get_game().current_level.main_player.kills), self.width-self.width//8, self.height//20, Colors.text).draw(surface)
         Text("Round: " + str(get_game().current_level.round_manager.get_round().number), self.width-self.width//8, self.height//10, Colors.text).draw(surface)
+        Text("x: " + str(get_game().current_level.main_player.entity.x), self.width-self.width//8, self.height//3, (0, 0, 0)).draw(surface)
+        Text("y: " + str(get_game().current_level.main_player.entity.y), self.width-self.width//8, self.height//3 + 70, (0, 0, 0)).draw(surface)
 
     @classmethod
     def alpha_draw(cls, surface, color, rect: pygame.Rect):

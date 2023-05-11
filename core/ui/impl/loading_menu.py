@@ -52,7 +52,7 @@ class LoadingMenu(Menu):
                 if pygame.mouse.get_cursor() != elem.hover():
                     pygame.mouse.set_cursor(elem.hover())
                     break
-        else:
+        else: # TODO: check si le drapeau est mort à a fin des update et pas quand il meurt reset le lvl
             if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 

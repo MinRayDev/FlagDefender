@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import random
 import time
-from pygame import Surface
 from typing import TYPE_CHECKING
+
+from pygame import Surface
 
 from core.ingame.backgrounds.elements.cloud import Cloud
 from util.draw_util import draw_with_scroll
@@ -51,9 +52,9 @@ class OverworldBackground(Background):
         ]
         self.ratios = [
             (surface.get_width() / (
-                        (self.world.size[0] * 2 + self.parts[1].get_width() * 2) * 2 + self.world.size[0] / 1.5)) * 0.2,
+                    (self.world.size[0] * 2 + self.parts[1].get_width() * 2) * 2 + self.world.size[0] / 1.5)) * 0.2,
             (surface.get_width() / (
-                        (self.world.size[0] * 2 + self.parts[2].get_width() * 2) * 2 + self.world.size[0] / 4))
+                    (self.world.size[0] * 2 + self.parts[2].get_width() * 2) * 2 + self.world.size[0] / 4))
 
         ]
 
@@ -63,7 +64,8 @@ class OverworldBackground(Background):
         surface.blit(
             self.parts[1],
             (
-                - ((self.parts[1].get_width() - surface.get_width()) // 2) + get_game().current_level.scroll * self.ratios[
+                - ((self.parts[1].get_width() - surface.get_width()) // 2) + get_game().current_level.scroll *
+                self.ratios[
                     0] - get_game().current_level.main_player.entity.width // 2,
                 surface.get_height() - self.parts[1].get_height() / 2.2
             )
@@ -71,7 +73,8 @@ class OverworldBackground(Background):
         surface.blit(
             self.parts[self.last_sprite],
             (
-                - ((self.parts[2].get_width() - surface.get_width()) // 2) + get_game().current_level.scroll * self.ratios[
+                - ((self.parts[2].get_width() - surface.get_width()) // 2) + get_game().current_level.scroll *
+                self.ratios[
                     1] - get_game().current_level.main_player.entity.width // 2,
                 surface.get_height() - self.parts[2].get_height() // 2.9
             )
@@ -86,10 +89,12 @@ class OverworldBackground(Background):
         self.floor.draw(surface)
         for cloud in self.clouds_draw:
             surface.blit(cloud.sprite, (
-                cloud.x + get_game().current_level.scroll * cloud.offset - get_game().current_level.main_player.entity.width // 2, cloud.y))
+                cloud.x + get_game().current_level.scroll * cloud.offset - get_game().current_level.main_player.entity.width // 2,
+                cloud.y))
         for tree in self.trees:
             to_draw = tree[0].get_surface()
-            draw_with_scroll(surface, to_draw, tree[1], get_client().screen.get_height() - self.world.floor - to_draw.get_height())
+            draw_with_scroll(surface, to_draw, tree[1],
+                             get_client().screen.get_height() - self.world.floor - to_draw.get_height())
 
     def generate_clouds(self) -> list[Cloud]:
         x = -self.world.size[0] - 800
@@ -145,18 +150,22 @@ class OverworldBackground(Background):
             surface.fill(self.night_color)
         if get_game().current_level.is_morning():
             surface.blit(self.stars["sun"], (100, get_client().screen.get_height() - (
-                    (time.time() - get_game().current_level.day_start) * surface.get_height()) / (get_game().current_level.day_duration / 2) -
+                    (time.time() - get_game().current_level.day_start) * surface.get_height()) / (
+                                                     get_game().current_level.day_duration / 2) -
                                              self.stars["sun"].get_height()))
         elif get_game().current_level.is_afternoon():
             surface.blit(self.stars["sun"], (get_client().screen.get_width() - 100 - self.stars["sun"].get_width(), (
-                    (time.time() - get_game().current_level.day_start - get_game().current_level.day_duration / 2) * surface.get_height()) / (
-                                                     get_game().current_level.day_duration / 2) - self.stars["sun"].get_height()))
+                    (
+                            time.time() - get_game().current_level.day_start - get_game().current_level.day_duration / 2) * surface.get_height()) / (
+                                                     get_game().current_level.day_duration / 2) - self.stars[
+                                                 "sun"].get_height()))
         elif get_game().current_level.is_night() and not get_game().current_level.is_past_midnight():
             moon = self.moons["moonfull"]
             # moon_mask = pygame.mask.from_surface(moon)
             # mask.draw(moon_mask, (100, get_client().screen.get_height() - ((time.time() - get_game().day_start - get_game().day_duration) * surface.get_height()) / (get_game().day_duration / 4) - moon.get_height()))
             surface.blit(moon, (100, get_client().screen.get_height() - (
-                    (time.time() - get_game().current_level.day_start - get_game().current_level.day_duration) * surface.get_height()) / (
+                    (
+                            time.time() - get_game().current_level.day_start - get_game().current_level.day_duration) * surface.get_height()) / (
                                         get_game().current_level.day_duration / 4) - moon.get_height()))
         elif get_game().current_level.is_past_midnight():
             moon = self.moons["moonfull"]
@@ -176,10 +185,12 @@ class OverworldBackground(Background):
     def from_json(json_dict: dict, level: 'Level') -> OverworldBackground:
         print("AHOUGA")
         background = OverworldBackground(level.worlds[0], True)
-        floor: Floor = Floor(r"./resources/sprites/world/background/floor", level.worlds[0].size[0]*2, level.worlds[0].floor, True)
-        floor.maps = json_dict["worlds"]["overworld"]["background"]["floor"]
-        for x in range(level.worlds[0].size[0]*4//16):
-            for y in range(level.worlds[0].floor//16):
+        floor: Floor = Floor(r"./resources/sprites/world/background/floor", level.worlds[0].size[0] * 2,
+                             level.worlds[0].floor, True)
+        backgrounds = json_dict["worlds"]["overworld"]["background"]
+        floor.maps = backgrounds["floor"]
+        for x in range(level.worlds[0].size[0] * 4 // 16):
+            for y in range(level.worlds[0].floor // 16):
                 if y == 0:
                     floor.surface.blit(floor.floor_sprites[floor.maps[x][y]], (16 * x, 0))
                 else:
@@ -187,7 +198,8 @@ class OverworldBackground(Background):
         # TODO: check loading
         # Loading trees
         background.floor = floor
-        for x in json_dict["worlds"]["overworld"]["background"]["trees"]:
+        trees = backgrounds["trees"]
+        for x in trees:
             print(x)
-            background.trees.append((Tree.from_json(json_dict["worlds"]["overworld"]["background"]["trees"][x]), int(x)))
+            background.trees.append((Tree.from_json(trees[x]), int(x)))
         return background
