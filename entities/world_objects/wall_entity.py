@@ -40,4 +40,4 @@ class WallEntity(Entity):
                 if len(get_entities_in_area((author.entity.x - 100 - 10, None),
                                             (author.entity.x - 10, None),
                                             author.entity.world)) == 0:
-                    return WallEntity(author.entity.x - 100 - 10, 0, author.entity.world)
+                    return WallEntity(author.entity.x - 96 - 10, 0, author.entity.world)

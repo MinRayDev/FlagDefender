@@ -28,6 +28,3 @@ class Flag(Entity):
                 self.is_attacked = True
         else:
             self.is_attacked = False
-
-    def death(self):
-        get_game().current_level.game_over()

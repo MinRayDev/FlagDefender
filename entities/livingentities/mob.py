@@ -26,6 +26,7 @@ class Mob(Entity):
         self.target = None
         self.has_ai = True
         self.speed = 3
+        self.can_move = True
         self.distance_damage = False
         self.can_attack = False
 
@@ -37,7 +38,7 @@ class Mob(Entity):
                 if self.cooldown <= self.temp_cooldown:
                     self.attack()
                     self.temp_cooldown = 0
-                if random.randint(0, 1) == 0 and not self.distance_damage:
+                if self.can_move and random.randint(0, 1) == 0 and not self.distance_damage:
                     self.go_to((self.target.x, self.target.y))
                 self.temp_cooldown += 1
             else:
@@ -57,7 +58,7 @@ class Mob(Entity):
             teleport(self, get_game().current_level.get_world_by_name("overworld"), -get_game().current_level.get_world_by_name("overworld").size[0]+2250)
 
     def get_target(self):
-        entities = get_entities_in_area((self.x - self.target_range, None), (self.x + self.target_range, None),
+        entities = get_entities_in_area((self.x - self.target_range, None), (self.x + self.width + self.target_range, None),
                                         self.world, EntityType.ALLY)
         if len(entities) > 0:
             self.target = random.choice(entities)
@@ -84,22 +85,22 @@ class Mob(Entity):
     def death(self):
         self.loot()
         super().death()
-        if self in get_game().current_level.round_manager.round.mobs:
-            del get_game().current_level.round_manager.round.mobs[get_game().current_level.round_manager.round.mobs.index(self)]
+        if self in get_game().current_level.round_manager.round_.mobs:
+            del get_game().current_level.round_manager.round_.mobs[get_game().current_level.round_manager.round_.mobs.index(self)]
 
     def loot(self):
         random_int = random.randint(1, 100)
-        if random_int <= 40:
+        if random_int <= 48:
             drop(ItemType.magical_essence, self.x, self.world)
-        elif random_int <= 55:
+        elif random_int <= 60:
             drop(ItemType.wall, self.x, self.world)
-        elif random_int <= 65:
+        elif random_int <= 70:
             drop(ItemType.big_wall, self.x, self.world)
-        elif random_int <= 72:
+        elif random_int <= 78:
             drop(ItemType.turret, self.x, self.world)
-        elif random_int <= 75:
+        elif random_int <= 85:
             drop(ItemType.tp_all, self.x, self.world)
-        elif random_int <= 77:
+        elif random_int <= 90:
             drop(ItemType.kill_all, self.x, self.world)
 
     def get_collisions(self):
@@ -129,3 +130,9 @@ class Mob(Entity):
     def draw(self, surface: Surface) -> None:
         super().draw(surface)
         self.draw_health_bar(surface)
+
+    def lock(self):
+        self.can_move = False
+
+    def unlock(self):
+        self.can_move = True

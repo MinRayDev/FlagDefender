@@ -14,5 +14,5 @@ def play(song_file):
         time.sleep(1)
 
 
-def play_song(song_file):
+def play_sound(song_file):
     threading.Thread(target=play, args=(song_file,), daemon=True).start()

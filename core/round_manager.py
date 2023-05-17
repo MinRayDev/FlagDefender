@@ -2,25 +2,60 @@ import random
 import time
 
 from typing import TYPE_CHECKING
+
+from util.logger import log
+
 if TYPE_CHECKING:
+    from core.level import Level
     from entities.livingentities.mob import Mob
 
 
 class Round:
+    """Class 'Round'.
+
+        :ivar number: Round number.
+        :type number: int.
+        :ivar mobs: Round's mobs.
+        :type mobs: list[Mob].
+        :ivar start_time: Time at start of round.
+        :type start_time: float.
+        :ivar end_time: Time at end of round.
+        :type end_time: float.
+
+    """
+    number: int
+    mobs: 'list[Mob]'
+    start_time: float
+    end_time: float
+
     def __init__(self, number: int):
+        """Constructor function for Round class.
+
+            :param number: Round number.
+            :type number: int.
+
+        """
         self.number = number
-        self.mobs: list[Mob] = []
+        self.mobs = []
         self.start_time = time.time()
         self.end_time = 0
 
-    def is_finished(self):
+    def is_finished(self) -> bool:
+        """Check if the round is finished.
+
+            :return: True if finished else False.
+            :rtype: bool.
+
+        """
         return len(self.mobs) == 0
 
-    def finish(self):
+    def finish(self) -> None:
+        """Finish the round by killing all the mobs in 'mobs'."""
         for mob in self.mobs.copy():
             mob.death()
 
-    def generate_mobs(self, game_instance):
+    def generate_mobs(self, game_instance) -> None:
+        """Spawn mobs."""
         from util.world_util import summon_mob
         from entities.livingentities.mobs.mob_fly_1 import MobFly1
         from entities.livingentities.mobs.mob_fly_2 import MobFly2
@@ -29,8 +64,9 @@ class Round:
         from entities.livingentities.mobs.mob_mortar import MobMortar
         from entities.livingentities.mobs.mob_speed import MobSpeed
         from entities.livingentities.mobs.mob_speed_physical import MobSpeedPhysical
-        min_ = self.number
-        max_ = self.number * 3
+        from core.world import World
+        min_: int = self.number
+        max_: int = self.number * 3
         types: list[tuple[object, int]] = [(MobBasic, -1)]
         if 5 <= self.number:
             types.append((MobSpeed, -1))
@@ -49,52 +85,82 @@ class Round:
             min_ = self.number//2
             max_ = self.number
 
-        mob_count = random.randint(min_, max_)
-        hells = (game_instance.get_world_by_name("left_world"), game_instance.get_world_by_name("right_world"))
+        mob_count: int = random.randint(min_, max_)
+        hells: tuple[World, World] = (game_instance.get_world_by_name("left_world"), game_instance.get_world_by_name("right_world"))
         for i in range(mob_count+1):
             mob = random.choice(types)
             if mob[1] != -1:
                 while True:
-                    count = 0
+                    count: int = 0
                     for mob_ in self.mobs:
                         if mob == type(mob_):
                             count += 1
                     if round((count/mob_count)*100, 0) <= mob[1]:
                         break
-            if random.randint(0, 1) == 0:
+            if random.randint(0, 1):
+                log("Left selected", '\33[0;31m')
                 # left
                 if hells[0].has_player():
                     entity = summon_mob(mob[0], -2000, hells[0])
+                    log("Entity: " + str(entity), '\33[0;31m')
                     self.mobs.append(entity)
                 else:
-                    entity = summon_mob(mob[0], 2000, game_instance.get_world_by_name("overworld"))
+                    entity = summon_mob(mob[0], -9000, game_instance.get_world_by_name("overworld"))
+                    log("Entity: " + str(entity), '\33[0;31m')
                     self.mobs.append(entity)
             else:
+                log("Right selected", '\33[0;31m')
                 if hells[1].has_player():
                     entity = summon_mob(mob[0], 0, hells[1])
+                    log("Entity: " + str(entity), '\33[0;31m')
                     self.mobs.append(entity)
                 else:
                     entity = summon_mob(mob[0], 9000, game_instance.get_world_by_name("overworld"))
+                    log("Entity: " + str(entity), '\33[0;31m')
                     self.mobs.append(entity)
 
 
 class RoundManager:
-    def __init__(self, game_instance, summon: bool = True):
-        self.round = Round(1)
-        self.game_instance = game_instance
+    """Class 'RoundManager'.
+
+        :ivar round_: Current round.
+        :type round_: Round.
+        :ivar __level: Current level.
+        :type __level: Level.
+        :ivar can_summon: If entities can be summoned.
+        :type can_summon: bool.
+        :ivar passed_rounds: List of all past rounds.
+        :type passed_rounds: list[Round].
+
+    """
+    round_: Round
+    __level: 'Level'
+    can_summon: bool
+    passed_rounds: list[Round]
+
+    def __init__(self, level: 'Level', summon: bool = True):
+        """Constructor function for RoundManager class.
+
+            :param level: Current level.
+            :type level: Level.
+            :param summon: If entities can be summoned.
+            :type summon: bool.
+
+        """
+        self.round_ = Round(1)
+        self.__level = level
         self.can_summon = summon
-        if summon:
-            self.round.generate_mobs(game_instance)
+        # if summon:
+        #     self.round_.generate_mobs(level)
 
         self.passed_rounds = []
 
-    def get_round(self) -> Round:
-        return self.round
+    def next_round(self) -> None:
+        """Change the round and spawn new monsters."""
+        self.passed_rounds.append(self.round_)
+        self.round_ = Round(self.round_.number + 1)
+        # self.round_.generate_mobs(self.__level)
 
-    def next_round(self):
-        self.passed_rounds.append(self.round)
-        self.round = Round(self.round.number + 1)
-        self.round.generate_mobs(self.game_instance)
-
-    def start(self):
+    def start(self) -> None:
+        """Allows the round manager to spawn monsters."""
         self.can_summon = True

@@ -1,6 +1,6 @@
 import time
 
-from core.ui.impl.loading_menu import LoadingMenu
+from ui.impl.loading_menu import LoadingMenu
 
 SLEEP_TIME = 0.25
 

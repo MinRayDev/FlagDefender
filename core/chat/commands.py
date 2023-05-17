@@ -152,5 +152,5 @@ class Commands:
             :type args: list[str].
 
         """
-        get_game().current_level.round_manager.round.finish()
+        get_game().current_level.round_manager.round_.finish()
         get_game().chat.write("The round has been passed.", MessageType.GAME)

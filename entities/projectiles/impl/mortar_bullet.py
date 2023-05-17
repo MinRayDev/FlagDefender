@@ -24,7 +24,7 @@ class MortarBullet(Fireball):
         self.target = target
 
         incline_factor: float = (10 - incline) / 10
-        angle_target = math.pi / 2 + ((math.pi / 2) * incline_factor)  # (get_dist(self, self.target)/(get_dist(self, self.target)*0.9))
+        angle_target = math.pi / 2 + ((math.pi / 2) * incline_factor)
 
         self.motion_x = 10 * math.cos(angle_target)
         if self.facing == Facing.EAST:  # /summon MobMortar 3000 overworld
@@ -32,11 +32,9 @@ class MortarBullet(Fireball):
 
         print("dist", get_dist(author, self.target), author.x, self.target.x, max(author.x, self.target.x), min(author.x, self.target.x))
         self.deceleration = 0.1
-        # get_dist(self, self.target)/(get_dist(self, self.target)*0.4)  # acceleration verticale
 
     def activity(self):
         super().activity()
-        print(self.x)
         if self.y + self.height + self.gravity_value < get_client().get_screen().get_height() - self.world.floor:
             self.x += self.motion_x
             self.y += self.gravity_value
@@ -44,14 +42,11 @@ class MortarBullet(Fireball):
             self.gravity_value = max(min(self.gravity_value, 10), -10)
 
         elif self.t >= 30:
-            print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
             self.death()
         else:
-            print("aadzdzdzdzaqfgrfegqgre(")
             self.t += 1
 
         if self.x > get_client().get_screen().get_width() * 5 or self.x + self.width < 0 - get_client().get_screen().get_width() * 5 or self.y > get_client().get_screen().get_height() * 5:
-            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             self.death()
         elif has_elapsed(self.start_time, 10):
             self.death()

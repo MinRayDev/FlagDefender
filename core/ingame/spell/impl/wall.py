@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import time
 
 from core.ingame.item.item_type import ItemType
@@ -11,11 +9,30 @@ from util.world_util import has_entity
 
 
 class Wall(Spell):
+    """Class 'Wall'.
+
+        Extend `Spell`.
+        :cvar cooldown: Spell's cooldown.
+        :type cooldown: int.
+
+        :cvar price: Spell's price (Magical Essence).
+        :type price: int.
+
+    """
     cooldown: int = 5
     price: int = 10
 
     @staticmethod
     def new(author: Player) -> WallSpellEntity:
+        """Generate new 'WallSpellEntity' spell.
+
+            :param author: Spell's author.
+            :type author: Player.
+
+            :return: WallSpellEntity entity.
+            :rtype: WallSpellEntity.
+
+        """
         if Spell.is_launchable(Wall, author) and author.inventory.get_item_count(ItemType.magical_essence) >= Wall.price:
             author.inventory.remove_item(ItemType.magical_essence, Wall.price)
             if author.entity.facing == Facing.EAST:

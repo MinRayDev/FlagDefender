@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Any
 
 
 def get_appdata_path():
@@ -48,7 +49,7 @@ def get_data_file() -> str:
     return os.path.join(get_base_path(), "data.json")
 
 
-def get_datas() -> dict:
+def get_datas() -> Any:
     return json.load(open(get_data_file(), "r"))
 
 

@@ -9,9 +9,20 @@ from util.world_util import get_entities_in_area, teleport
 
 
 class ItemUsage:
+    """Class 'Inventory'.
+
+        In this class there is all usage of items.
+
+    """
 
     @staticmethod
     def wall_use() -> WallEntity:
+        """Usage of wall item, summon a wall and return it.
+
+            :return: Wall Entity.
+            :rtype: WallEntity.
+
+        """
         author = get_game().current_level.main_player
         match author.entity.facing:
             case Facing.EAST:
@@ -31,6 +42,12 @@ class ItemUsage:
 
     @staticmethod
     def big_wall_use() -> BigWallEntity:
+        """Usage of big wall item, summon a big wall and return it.
+
+            :return: Big Wall Entity.
+            :rtype: BigWallEntity.
+
+        """
         author = get_game().current_level.main_player
         match author.entity.facing:
             case Facing.EAST:
@@ -50,6 +67,12 @@ class ItemUsage:
 
     @staticmethod
     def turret_use() -> TurretEntity:
+        """Usage of turret item, summon a turret and return it.
+
+            :return: Turret Entity.
+            :rtype: TurretEntity.
+
+        """
         author = get_game().current_level.main_player
         match author.entity.facing:
             case Facing.EAST:
@@ -68,15 +91,31 @@ class ItemUsage:
                     return turret_entity
 
     @staticmethod
-    def kill_all() -> None:
+    def kill_all() -> bool:
+        """Usage of kill all item.
+
+            Kill all mobs in author's world.
+
+            :rtype: bool.
+
+        """
         author = get_game().current_level.main_player
         for entity in author.entity.world.entities.copy():
             if entity.type == EntityType.ENEMY:
                 entity.death()
+        return True
 
     @staticmethod
-    def tp_all() -> None:
+    def tp_all() -> bool:
+        """Usage of tp all item.
+
+            Tp all items in author's world at author's location.
+
+            :rtype: bool.
+
+        """
         author = get_game().current_level.main_player
         for entity in author.entity.world.entities:
             if isinstance(entity, ItemEntity):
                 teleport(entity, author.entity.world, author.entity.x)
+        return True

@@ -1,11 +1,11 @@
 import enum
 import time
+import traceback
 
 from core.ingame.item.item_type import ItemType
+from util.logger import log
 
 registered_entities = []
-registered_commands = []
-registered_items = []
 
 
 class MessageType(enum.IntEnum):
@@ -223,6 +223,7 @@ def entity_register(entity_class) -> type:
         :type: type.
 
     """
+    log("Register entity: " + str(entity_class))
     registered_entities.append(entity_class)
     return entity_class
 
@@ -267,7 +268,9 @@ class Command:
 
         """
         from util.instance import get_game
+
         if Command.is_command(message):
+            from core.chat.commands import Commands
             string = message[1:]
             cmd = string.split(" ")[0]
             # Here we split arguments of the command (an argument is a part of the command separated by a " " and which is not the command itself
@@ -275,4 +278,4 @@ class Command:
             try:
                 exec("Commands." + cmd + f"({args})")
             except Exception as e:
-                get_game().chat.write("Unknow command", MessageType.GAME)
+                get_game().chat.write("Unknown command", MessageType.GAME)

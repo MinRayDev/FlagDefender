@@ -7,11 +7,10 @@ class Controller:
     def __init__(self, source_type):
         self.source_type: Sources = source_type
 
-    def get_event_controls(self, incoming_events):
+    def get_event_controls(self, incoming_events) -> Inputs:
         inputs = Inputs()
         for event in incoming_events:
             inputs.raw_add(event)
-            # print(input.raw_inputs)
             # Si la source est un clavier
             if self.source_type == Sources.keyboard and (event.type == pygame.KEYDOWN or event.type == pygame.KEYUP):
                 if Controls.key_exists(event.key):

@@ -8,41 +8,103 @@ from pygame import Surface
 
 from core.chat.chat import Chat
 from core.level import Level
-from core.ui.impl.ingame_menu.chat_message import ChatMessageMenu
-from core.ui.impl.ingame_menu.hud import HUD
-from core.ui.menu import Menu
+from ui.impl.ingame_menu.chat_message import ChatMessageMenu
+from ui.impl.ingame_menu.hud import HUD
+from ui.menu import Menu
+from util.logger import log
 from util.time_util import has_elapsed
 
 
 class Game:
+    """Class 'Game'.
+
+        :cvar instance: Game's instance.
+        :type instance: Game.
+        :cvar name: Game's name.
+        :type name: str.
+        :cvar version: Game's version.
+        :type version: str.
+
+        :ivar is_init: True if the game is inited else False.
+        :type is_init: bool.
+        :ivar current_menu: Game's current menu.
+        :type current_menu: Optional[Menu].
+        :ivar run: True if the game is running else False.
+        :type run: bool.
+
+        :ivar chat: Game's chat instance.
+        :type chat: Chat.
+        :ivar chat_menu: Game's chat menu instance.
+        :type chat_menu: ChatMessageMenu.
+        :ivar hud: Game's HUD instance.
+        :type hud: HUD.
+
+        :ivar levels: Game's level list.
+        :type levels: list[Level].
+        :ivar current_level: Game's current level.
+        :type current_level: Level.
+
+        :ivar TPS: Game's tick per second.
+        :type TPS: float.
+
+    """
     instance: Game = None
     name: str = "UwU"
     version: str = "0.0.1"
 
+    is_init: bool
+    current_menu: Optional[Menu]
+    run: bool
+    chat: Chat
+    chat_menu: ChatMessageMenu
+    hud: HUD
+    levels: list[Level]
+    current_level: Optional[Level]
+    TPS: float
+
     def __init__(self):
-        from core.ui.impl.main_menu import MainMenu
+        """Constructor function for Game class."""
+        from ui.impl.main_menu import MainMenu
         self.is_init = False
-        self.current_menu: Optional[Menu] = MainMenu()
-        self.run: bool = True
-        self.chat: Chat = Chat()
+        self.current_menu = MainMenu()
+        self.run = True
+        self.chat = Chat()
         self.chat_menu = ChatMessageMenu(self)
         self.hud = HUD()
-        self.levels: list[Level] = []
-        self.current_level: Optional[Level] = None
-        self.TPS: float = 60
-
-        # win = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.levels = []
+        self.current_level = None
+        self.TPS = 60
+        self.init_mobs()
 
     def reset_menu(self) -> None:
+        """Reset the current menu."""
         self.current_menu = None
 
     def set_menu(self, menu: Menu) -> None:
+        """Set the current menu.
+
+            :param menu: New menu.
+            :type menu: Menu.
+
+        """
         self.current_menu = menu
 
     def has_menu(self) -> bool:
+        """Check if the game has a menu.
+
+            :return: True if game has a menu else False.
+            :rtype: bool.
+
+        """
         return self.current_menu is not None
 
-    def create_level(self, name="") -> Level:
+    def create_level(self, name: str = "") -> Level:
+        """Create a new level.
+
+            :return: The new level.
+            :rtype: Level.
+
+        """
         if name == "":
             name = str(time.time())
         level: Level = Level(name)
@@ -51,18 +113,30 @@ class Game:
         return level
 
     def set_level(self, level: Level) -> None:
+        """Set a new level.
+
+            :param level: The new level.
+            :type level: Level.
+
+        """
         if level is None:
-            print("Attempted to set level to None, prefer using #reset_level()")
+            log("Attempted to set level to None, prefer using #reset_level()")
         self.levels.append(level)
         self.current_level = level
 
     def reset_level(self) -> None:
-        print("Reset level")
+        """Reset current level."""
         self.levels.clear()
         self.current_level = None
 
-    def update_logic(self):
-        from core.ui.game_menu import GameMenu
+    def update_logic(self) -> None:
+        """Update Game's logic.
+
+            For each entity for each world the code calls its function 'activity' and for each player too.
+            Afterwards it will check if the round is finished.
+
+        """
+        from ui.game_menu import GameMenu
         from entities.livingentities.entity_player import PlayerEntity
         if self.current_menu is not None and not isinstance(self.current_menu, GameMenu):
             self.current_menu.activity()
@@ -79,27 +153,35 @@ class Game:
                         for entity_ in world.entities:
                             if not isinstance(entity_, PlayerEntity) and entity_.source == 0:
                                 entity_.activity()
-                if self.current_level is not None:
-                    for player_ in self.current_level.players:
-                        player_.activity()
-                        player_.entity.activity(keys=player_.keys, events=player_.events)
-                        player_.reset_queues()
+                for player_ in self.current_level.players:
+                    player_.activity()
+                    player_.entity.activity(keys=player_.keys, events=player_.events)
+                    player_.reset_queues()
+                    break
+                if self.current_level.round_manager.round_.is_finished():
+                    if self.current_level.round_manager.round_.end_time == 0:
+                        self.current_level.round_manager.round_.end_time = time.time()
+                    if has_elapsed(self.current_level.round_manager.round_.end_time, 5):
+                        if self.current_level.round_manager.can_summon:
+                            self.current_level.round_manager.next_round()
+                for entity in self.current_level.worlds[0].entities:
+                    from entities.world_objects.flag import Flag
+                    if isinstance(entity, Flag):
                         break
-                    if self.current_level.round_manager.round.is_finished():
-                        if self.current_level.round_manager.round.end_time == 0:
-                            self.current_level.round_manager.round.end_time = time.time()
-                        if has_elapsed(self.current_level.round_manager.round.end_time, 5):
-                            if self.current_level.round_manager.can_summon:
-                                self.current_level.round_manager.next_round()
+                else:
+                    self.current_level.game_over()
 
     def render(self, surface: Surface) -> None:
-        from core.ui.game_menu import GameMenu
+        """Render the whole game.
+
+            For each entity for each world, for each menu (current menu if it's an instance of a game menu, HUD, Chat) the code calls its function 'draw'.
+
+        """
+        from ui.game_menu import GameMenu
         if isinstance(self.current_menu, GameMenu) or self.current_menu is None:
             # Draw world
             if self.current_level.main_player.entity.world.background is not None:
                 self.current_level.main_player.entity.world.background.draw(surface)
-            # floor.draw(client.screen)
-
             for entity in self.current_level.main_player.entity.world.entities:
                 entity.draw(surface)
             if self.current_level.main_player.entity.world.name == "overworld":
@@ -121,3 +203,14 @@ class Game:
             self.hud.draw(surface)
         if self.current_menu is not None:
             self.current_menu.draw(surface)
+
+    @classmethod
+    def init_mobs(cls) -> None:
+        """Import mobs to initialize them and add them to the registered_entities list."""
+        from entities.livingentities.mobs.mob_fly_1 import MobFly1
+        from entities.livingentities.mobs.mob_fly_2 import MobFly2
+        from entities.livingentities.mobs.mob_tank import MobTank
+        from entities.livingentities.mobs.mob_basic import MobBasic
+        from entities.livingentities.mobs.mob_mortar import MobMortar
+        from entities.livingentities.mobs.mob_speed import MobSpeed
+        from entities.livingentities.mobs.mob_speed_physical import MobSpeedPhysical

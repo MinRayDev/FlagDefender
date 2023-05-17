@@ -3,12 +3,13 @@ import random
 
 from core.chat.chat import entity_register
 from core.world import Facing
-from entities.entity import EntityType, DamageType
+from entities.entity import DamageType
 from entities.livingentities.mob import Mob
-from util import world_util
 from util.instance import get_client
+from util.logger import log
 
 
+# TODO
 @entity_register
 class MobSpeedPhysical(Mob):
     def __init__(self, x, y, world, facing=Facing.SOUTH):
@@ -26,33 +27,34 @@ class MobSpeedPhysical(Mob):
         angle_target: float = math.pi / 2 + ((math.pi / 2) * incline_factor)
 
         self.motion_x = 7 * math.cos(angle_target)
-        if self.facing == Facing.EAST:
+        if self.facing == Facing.WEST:
             self.motion_x *= -1
 
         self.deceleration = 0.1  # acceleration verticale
 
-    def activity(self):
+    def activity(self) -> None:
         super().activity()
+        log("Target: " + str(self.target) + " Motion: " + str(self.motion_x))
         self.sprite_selected = self.walk_sprites[1]
         if not self.is_flying():
-            if self.facing == Facing.EAST and self.motion_x > 0:
-                self.motion_x *= -1
-            elif self.facing == Facing.WEST and self.motion_x < 0:
-                self.motion_x *= -1
+            if self.facing == Facing.EAST:
+                self.motion_x = abs(self.motion_x)
+            elif self.facing == Facing.WEST:
+                self.motion_x = - abs(self.motion_x)
         if self.y + self.height + self.gravity_value >= get_client().get_screen().get_height() - self.world.floor:
             self.to_floor()
             self.gravity_value = 0 - self.incline
 
-    def attack(self):
+    def attack(self) -> None:
         if random.randint(30, 100) > 70:
-            to_attack = world_util.nearest_entity(self, EntityType.ALLY)
+            to_attack = self.target
             if to_attack is not None:
                 if self.facing == Facing.EAST and self.x + 150 >= to_attack.x >= self.x:
                     to_attack.damage(10, DamageType.PHYSICAL, self)
                 elif self.facing == Facing.WEST and self.x - 150 <= to_attack.x <= self.x:
                     to_attack.damage(10, DamageType.PHYSICAL, self)
 
-    def go_to(self, pos: tuple[int, int]):
+    def go_to(self, pos: tuple[int, int]) -> None:
         if self.has_ai and self.can_move:
             col = self.get_collisions()
             if self.x != pos[0]:

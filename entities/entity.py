@@ -117,6 +117,6 @@ class DamageType(enum.IntEnum):
 
 
 class EntityType(enum.IntEnum):
-    DEFAULT = 1  # pas visé
+    DEFAULT = 1
     ALLY = 2
     ENEMY = 3

@@ -3,6 +3,7 @@ from core.world import Facing
 from entities.entity import Entity
 from entities.projectiles.impl.fireball import Fireball
 from util.instance import get_client, get_game
+from util.logger import log
 
 
 class RemoteFireball(Fireball):
@@ -23,6 +24,7 @@ class RemoteFireball(Fireball):
                 self.motion_y = abs((self.y - target_y)*2 // get_game().TPS)
 
     def activity(self):
+        log(str(self.x) + " " + str(self.y))
         if self.health <= 0:
             self.death()
         self.gravity()

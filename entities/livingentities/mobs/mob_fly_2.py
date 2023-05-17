@@ -8,6 +8,8 @@ from entities.livingentities.mob import Mob
 from entities.projectiles.impl.bomb_entity import BombEntity
 from util.draw_util import draw_with_scroll
 from util.instance import get_client
+from util.logger import log, LogColors
+from util.world_util import area_contains
 
 
 @entity_register
@@ -16,13 +18,16 @@ class MobFly2(Mob):
         super().__init__(x, y, sprites_path=r"./resources/sprites/mobs/fly2", facing=facing, world=world, health=100)
         self.cooldown = 30
         self.last_facing = self.facing
-        self.y = get_client().get_screen().get_height() - self.world.floor - self.height - random.randint(100, 300)
+        self.y = get_client().get_screen().get_height() - self.world.floor - self.height - random.randint(300, 600)
         self.has_gravity = False
         self.i = 0
         self.sprite_selected_index = 1
         self.offsets: dict[Surface, int] = {self.sprites["3"]: -13}
 
     def activity(self):
+        self.unlock()
+        if self.target is not None and area_contains((self.x - self.width//3, None), (self.x + self.width + self.width//3, None), self.target):
+            self.lock()
         super().activity()
         if self.facing == Facing.WEST:
             if self.sprite_selected_index > 4:
@@ -40,7 +45,9 @@ class MobFly2(Mob):
 
     def attack(self):
         if random.randint(30, 100) > 70:
-            BombEntity(self.x + self.width // 2, self.y + self.height + 5, self, -20)
+            log("Attack: " + str(self.target), LogColors.RED)
+            log("X: " + str(self.x) + " Y: " + str(self.y), LogColors.RED)
+            BombEntity(self.x + self.width // 2, self.y + self.height + 5, self, -15)
 
     def draw(self, surface: Surface) -> None:
         offset: int = 0

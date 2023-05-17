@@ -6,17 +6,53 @@ from pygame import Surface
 from core.ingame.backgrounds.elements.tree_elements.branch import Branch
 from core.ingame.backgrounds.elements.tree_elements.tree_element import TreeElement
 from core.world import Facing
+from util.logger import log
 from util.sprites import load
 
 
 class Trunk(TreeElement):
+    """Class 'Trunk'.
+
+        :ivar body_sprites: Dict of body sprites associated with their names.
+        :type body_sprites: dict[str, Surface].
+
+        :ivar branches: Dict of facing associated with their branches.
+        :type branches: dict[Facing, Branch].
+
+        :ivar facings: List of facings.
+        :type facings: list[Facing].
+
+        :ivar multiplier: Number with which the sizes will be multiplied to make the tree grow.
+        :type multiplier: float.
+
+        :ivar index: Currant sprite's name.
+        :type index: str.
+
+        :ivar final_surface: Trunk's final surface (to draw).
+        :type final_surface: Surface.
+
+    """
+    body_sprites: dict[str, Surface]
+    branches: dict[Facing, Branch]
+    facings: list[Facing]
+    multiplier: float
+    index: str
+    final_surface: Surface
+
     def __init__(self, facings: list[Facing], is_dead: bool, multiplier: float):
+        """Constructor function for Trunk class.
+
+            :param facings: List of facings.
+            :type facings: list[Facing].
+            :param is_dead: True if the tree is dead else False.
+            :type is_dead: bool.
+            :param multiplier: Number with which the sizes will be multiplied to make the tree grow.
+            :type multiplier: float.
+
+        """
         super().__init__()
-        self.body_sprites: dict[str, Surface] = load(
-            r"./resources/sprites/world/tree/body")
-        self.simple_bodys: list[str] = [x for x in self.body_sprites if "branch" not in x and "bottom" not in x]
-        self.branch_bodys: list[str] = [x for x in self.body_sprites if "branch" in x]
-        self.branches: dict[Facing, Branch] = {}
+        self.body_sprites = load(r"./resources/sprites/world/tree/body")
+        self.branches = {}
         self.facings = facings
         self.multiplier = multiplier
         if len(facings) == 0:
@@ -34,13 +70,18 @@ class Trunk(TreeElement):
             # Left
             self.index = "branch_" + str(random.randint(7, 12))
             self.branches[Facing.WEST] = Branch(Facing.WEST, is_dead, multiplier)
-        self.trunk_sprite: Surface = self.resize(self.body_sprites[self.index].copy(), self.multiplier)
         self.final_surface = self.generate_surface()
 
     def generate_surface(self) -> Surface:
-        self.trunk_sprite: Surface = self.resize(self.body_sprites[self.index].copy(), self.multiplier)
-        width: int = self.trunk_sprite.get_width()
-        height: int = self.trunk_sprite.get_height()
+        """Generate the surface to draw.
+
+           :return: Surface to draw.
+           :rtype: Surface.
+
+       """
+        trunk_sprite: Surface = self.resize(self.body_sprites[self.index].copy(), self.multiplier)
+        width: int = trunk_sprite.get_width()
+        height: int = trunk_sprite.get_height()
         for facing in self.branches:
             branch_surface: Surface = self.branches[facing].get_surface()
             width += branch_surface.get_width()
@@ -52,29 +93,39 @@ class Trunk(TreeElement):
             branch_surface: Surface = self.branches[Facing.WEST].get_surface()
             surface.blit(branch_surface, (x, height - branch_surface.get_height()))
             x += branch_surface.get_width()
-        surface.blit(self.trunk_sprite, (x, height - self.trunk_sprite.get_height()))
-        x += self.trunk_sprite.get_width()
+        surface.blit(trunk_sprite, (x, 0))
+        x += trunk_sprite.get_width()
         if Facing.EAST in self.branches:
             branch_surface: Surface = self.branches[Facing.EAST].get_surface()
-            surface.blit(branch_surface, (x, height - branch_surface.get_height()))
+            surface.blit(branch_surface, (x, 0))
         return surface
 
     def get_surface(self) -> Surface:
+        """Get 'final_surface'.
+
+            :return: Surface to draw.
+            :rtype: Surface.
+
+        """
         return self.final_surface
 
     def get_height(self) -> int:
-        return self.trunk_sprite.get_height()
+        """Get trunk body sprite's height.
+
+            :return: The height.
+            :rtype: int.
+
+        """
+        return self.resize(self.body_sprites[self.index].copy(), self.multiplier).get_height()
 
     def get_offset(self) -> int:
+        """Get current sprite's offset.
+
+            :return: The offset.
+            :rtype: float.
+
+        """
         for facing in self.branches:
             if facing == Facing.WEST:
                 return self.branches[facing].get_surface().get_width()
-        else:
-            return 0
-
-    def get_vertical_offset(self) -> int:
-        temp_branches_height: list[int] = [x.get_surface().get_height() for x in self.branches.values()]
-        if len(temp_branches_height) != 0:
-            return max(temp_branches_height)
-        else:
-            return 0
+        return 0

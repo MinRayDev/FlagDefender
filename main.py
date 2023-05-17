@@ -1,7 +1,8 @@
 from os.path import dirname, realpath
 import pygame
-from pygame.event import Event
 import sys
+
+from pygame.event import Event
 
 
 def append_module() -> None:
@@ -15,7 +16,7 @@ if __name__ == "__main__":
 
     from core.client import Client
     from core.game import Game
-    from core.ui.game_menu import GameMenu
+    from ui.game_menu import GameMenu
     from util.input.controls import ControlsEventTypes, Inputs
 
     client: Client = Client()
@@ -38,8 +39,7 @@ if __name__ == "__main__":
                         game.current_menu.add_queue(elem_)
                 for elem_ in events_filtered.raw_inputs:
                     game.current_menu.add_raw_queue(elem_)
-        if game.current_menu is None or (
-                isinstance(game.current_menu, GameMenu) and not game.current_menu.game_input_filter):
+        if game.current_menu is None or (isinstance(game.current_menu, GameMenu) and not game.current_menu.game_input_filter):
             for player in game.current_level.players:
                 player.get_controls(events)
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
             last_update = pygame.time.get_ticks()
 
         # Rendering
-        game.render(client.screen)
+        game.render(client.get_screen())
         client.clock.tick(120)
         pygame.display.update()
     pygame.quit()

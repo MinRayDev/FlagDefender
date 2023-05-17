@@ -54,10 +54,6 @@ class Arrow(Projectile):
             self.y += self.gravity_value
             self.gravity_value += self.deceleration
             self.gravity_value = max(min(self.gravity_value, 10), -10)
-
-            # print(f"{gravity_factor=}")
-
-            # self.rotate = 180 - math.sin(self.gravity_value * math.pi / 2)
             self.rotate = self.update_rotation()
 
         else:

@@ -7,7 +7,7 @@ from entities.livingentities.mob import Mob
 from entities.projectiles.impl.mortar_bullet import MortarBullet
 from util import world_util
 
-
+# TODO
 @entity_register
 class MobMortar(Mob):
     def __init__(self, x, y, world, facing=Facing.SOUTH):

@@ -14,7 +14,7 @@ from util.world_util import get_entities_in_area
 @entity_register
 class BigWallEntity(Entity):
     def __init__(self, x, y, world):
-        super().__init__(x, y, r"./resources/sprites/spells/wall", world, health=1000)
+        super().__init__(x, y, r"./resources/sprites/build/big_wall", world, health=1000)
         self.to_floor()
         self.creation_time = time.time()
         self.has_gravity = False
@@ -39,4 +39,4 @@ class BigWallEntity(Entity):
                 if len(get_entities_in_area((author.entity.x - 100 - 10, None),
                                             (author.entity.x - 10, None),
                                             author.entity.world)) == 0:
-                    return BigWallEntity(author.entity.x - 100 - 10, 0, author.entity.world)
+                    return BigWallEntity(author.entity.x - 176 - 10, 0, author.entity.world)

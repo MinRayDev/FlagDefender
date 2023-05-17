@@ -5,6 +5,7 @@ from pygame import Surface
 from core.world import World
 from entities.entity import Entity
 from entities.livingentities.entity_player import PlayerEntity
+from util.audio import play_sound
 from util.draw_util import draw_with_scroll
 from util.world_util import teleport
 
@@ -38,6 +39,7 @@ class PortalEntity(Entity):
                 self.players_contained.pop(entity)
             elif entity in self.players_contained and self.players_contained[entity] + 1.5 < time.time():
                 teleport(entity, self.linked_world, self.linked_x)
+                play_sound("portal.mp3")
                 self.players_contained.pop(entity)
 
     def draw(self, surface: Surface) -> None:

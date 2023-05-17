@@ -10,10 +10,11 @@ from entities.projectiles.impl.remote_fireball import RemoteFireball
 from util import world_util
 from util.draw_util import draw_with_scroll
 from util.instance import get_client
+from util.logger import log, LogColors
 
 
 @entity_register
-class MobFly1(Mob):  # TODO tire custom vers target (vers le sol)
+class MobFly1(Mob):
     def __init__(self, x, y, world, facing=Facing.SOUTH):
         self.sprite_selected_index = 1
         super().__init__(x, y, sprites_path=r"./resources/sprites/mobs/fly", facing=facing, world=world, health=100)
@@ -42,14 +43,7 @@ class MobFly1(Mob):  # TODO tire custom vers target (vers le sol)
 
     def attack(self):
         if random.randint(30, 100) > 50:
-            to_attack = world_util.nearest_entity(self, EntityType.ALLY)
-            if to_attack is not None:
-                if self.x + self.width * 3 >= to_attack.x >= self.x + self.width // 2:
-                    self.facing = Facing.EAST
-                    RemoteFireball(0, 0, self, to_attack)
-                elif self.x - self.width * 2 <= to_attack.x <= self.x + self.width // 2:
-                    self.facing = Facing.WEST
-                    RemoteFireball(0, 0, self, to_attack)
+            RemoteFireball(0, 0, self, self.target)
 
     def draw(self, surface: Surface) -> None:
         draw_with_scroll(surface, self.sprites[str(self.sprite_selected_index)], self.x, self.y)

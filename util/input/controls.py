@@ -1,3 +1,4 @@
+from __future__ import annotations
 import enum
 
 import pygame
@@ -15,7 +16,6 @@ class Controls(enum.Enum):
     attack_1 = {"keyboard": {"key": 97, "code": pygame.K_a}}
     attack_2 = {"keyboard": {"key": 98, "code": pygame.K_b}}
     attack_3 = {"keyboard": {"key": 113, "code": pygame.K_q}}
-    attack_4 = {"keyboard": {"key": 100, "code": pygame.K_d}}
     incline_up = {"keyboard": {"key": 1073741906, "code": pygame.K_UP}}
     incline_down = {"keyboard": {"key": 1073741905, "code": pygame.K_DOWN}}
     spell_1 = {"keyboard": {"key": 99, "code": pygame.K_c}}
@@ -91,6 +91,9 @@ class Mouse(enum.Enum):
 
 
 class Inputs:
+    inputs: list[Event]
+    raw_inputs: list
+
     def __init__(self):
         self.inputs = []
         self.raw_inputs = []

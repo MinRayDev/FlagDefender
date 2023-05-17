@@ -3,6 +3,8 @@ from time import time
 
 from pygame import Surface
 
+from util.logger import log
+from util.time_util import has_elapsed
 from util.world_util import teleport
 from entities.entity import Entity, EntityType, DamageType
 from core.world import Facing, World
@@ -47,8 +49,6 @@ class PlayerEntity(Entity):
             if self.facing != Facing.WEST:
                 self.facing = Facing.WEST
 
-                # self.change_sprite()
-
         elif Controls.right_walk.get_code() in keys:
             self.is_walking = True
             if self.frame < 11 or self.frame > 22:
@@ -72,7 +72,6 @@ class PlayerEntity(Entity):
     def draw(self, surface: Surface) -> None:
         if get_game().current_level.main_player.entity != self:
             super().draw(surface)
-            # surface.blit(self.sprite_selected, (self.x + get_client().get_screen().get_width() // 2 + get_game().scroll, self.y))
         else:
             if self.is_walking:
                 self.i += 1
@@ -89,7 +88,6 @@ class PlayerEntity(Entity):
                 elif self.facing == Facing.EAST:
                     self.frame = 11
             surface.blit(self.sprites[str(self.frame)], (surface.get_width()//2 - self.width//2, self.y))
-
 
     def death(self):
         teleport(self, self.world, 0)
@@ -114,5 +112,5 @@ class PlayerEntity(Entity):
         return pe
 
     def damage(self, amount: float, damage_type: DamageType, author: Entity = None):
-        if not self.invincible:
+        if not self.invincible and has_elapsed(self.death_time, 5):
             super().damage(amount, damage_type, author)

@@ -6,7 +6,7 @@ from entities.entity import EntityType, DamageType
 from entities.livingentities.mob import Mob
 from util import world_util
 
-
+# TODO
 @entity_register
 class MobTank(Mob):
     def __init__(self, x, y, world, facing=Facing.SOUTH):
