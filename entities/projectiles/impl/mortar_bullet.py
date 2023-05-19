@@ -8,7 +8,6 @@ from util.logger import log, LogColors
 from util.time_util import has_elapsed
 
 
-
 class MortarBullet(Fireball):
     """Class 'MortarBullet'.
 
