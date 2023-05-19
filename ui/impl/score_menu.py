@@ -15,7 +15,37 @@ from util.instance import get_game
 
 
 class ScoreMenu(Menu):
-    def __init__(self, prev):
+    """Class 'ScoreMenu' is the score menu of the game.
+
+        Extends the class 'Menu'.
+        :ivar base_color: The base color of the menu.
+        :type base_color: tuple[int, int, int].
+        :ivar button_base_color: The base color of the buttons.
+        :type button_base_color: tuple[int, int, int].
+        :ivar button_hover_color: The hover color of the buttons.
+        :type button_hover_color: tuple[int, int, int].
+        :ivar text_color: The text color of the menu.
+        :type text_color: tuple[int, int, int].
+        :ivar back_button: The button to go back to the previous menu.
+        :type back_button: ButtonText.
+        :ivar sp: The scrollpane of the menu.
+        :type sp: ScrollPane.
+
+    """
+    base_color: tuple[int, int, int]
+    button_base_color: tuple[int, int, int]
+    button_hover_color: tuple[int, int, int]
+    text_color: tuple[int, int, int]
+    back_button: ButtonText
+    sp: ScrollPane
+
+    def __init__(self, prev: Menu):
+        """Constructor of the class 'ScoreMenu'.
+
+            :param prev: The previous menu.
+            :type prev: Menu.
+
+        """
         super().__init__("Score Menu", prev)
         self.base_color = Colors.base_color
         self.button_base_color = Colors.button_base_color
@@ -33,7 +63,7 @@ class ScoreMenu(Menu):
         self.sp = ScrollPane(10, self.back_button.y + self.back_button.height + 5, get_client().get_screen().get_width() - 20, get_client().get_screen().get_height() - 200,
                              self.base_color)
 
-        y = get_client().get_screen().get_height() // 75 + get_client().get_screen().get_height() // 17 + 50
+        y: int = int(get_client().get_screen().get_height() // 75 + get_client().get_screen().get_height() // 17 + 50)
         scores = sorted(get_datas()["scores"], key=lambda score_: -score_["score"])
         for i, score in enumerate(scores):
             text: Text = Text(str(i+1) + ". " + str(score["score"]) + " (" + datetime.fromtimestamp(score["time"]).strftime("%m/%d/%Y, %Hh %Mmin %Ss") + ")", 0, y, self.text_color)
@@ -43,7 +73,8 @@ class ScoreMenu(Menu):
         self.elems += [self.sp, self.back_button]
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
-    def activity(self):
+    def activity(self) -> None:
+        """Method 'activity' updates the menu."""
         super().activity()
         inputs = self.get_queue()
         for elem in self.elems:
@@ -60,6 +91,12 @@ class ScoreMenu(Menu):
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def draw(self, surface: Surface) -> None:
+        """Method 'draw' draws the menu.
+
+            :param surface: The surface to draw on.
+            :type surface: Surface.
+
+        """
         pygame.draw.rect(surface, Colors.base_color, pygame.Rect(0, 0, get_client().get_screen().get_width(), get_client().get_screen().get_height()))
         for elem in self.elems:
             elem.draw(surface)

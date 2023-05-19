@@ -1,64 +1,82 @@
-import math
 import time
 
 from core.world import Facing
 from entities.entity import Entity
 from entities.projectiles.impl.fireball import Fireball
 from util.instance import get_game, get_client
+from util.logger import log, LogColors
 from util.time_util import has_elapsed
-from util.world_util import get_dist
+
 
 
 class MortarBullet(Fireball):
-    def __init__(self, x: int, y: int, author: Entity, target: Entity):
+    """Class 'MortarBullet'.
+
+        Extends 'Fireball'.
+        :ivar start_x: The start x position of the mortar bullet.
+        :type start_x: int.
+        :ivar start_y: The start y position of the mortar bullet.
+        :type start_y: int.
+        :ivar formula: The formula of the parabola.
+        :type formula: str.
+        :ivar start_time: The start time of the mortar bullet.
+        :type start_time: float.
+
+    """
+    start_x: int
+    start_y: int
+    formula: str
+    start_time: float
+    dist_base: int
+
+    def __init__(self, x: int, y: int, author: Entity, target: Entity) -> None:
+        """Constructor of the class 'MortarBullet'.
+
+            :param x: The x position of the mortar bullet.
+            :type x: int.
+            :param y: The y position of the mortar bullet.
+            :type y: int.
+            :param author: The author of the mortar bullet.
+            :type author: Entity.
+            :param target: The target of the mortar bullet.
+            :type target: Entity.
+
+        """
         super().__init__(x, y, author)
         self.y = author.y + 10
+        self.start_y = self.y
+        self.motion_x = 2
+        self.facing = author.facing
         if self.facing == Facing.WEST:
+            self.dist_base = abs(self.x - target.x)
             self.x = author.x - self.width - 2
+            self.motion_x = -2
         else:
+            self.dist_base = abs(self.x - target.x)
             self.x = author.x + author.width + 2
-        self.t = 0
-        incline = 5
-        self.gravity_value = 0 - incline  # vitesse verticale, negative : vers le haut, positive : vers le bas
+        self.start_x = self.x
+
+        # Formula: (1/65)*x**2 - (dist_base/65)*x + start_y
+        # 1/65 so the parabola is not too high
+        # dist_base/65 so the parabola is not too long (dist_base is the distance between the mortar bullet (at the start) and the target)
+        # start_y so the parabola starts at the right height
+        self.formula = f"(1/65)*x**2 - ({self.dist_base}/65)*x + {self.start_y}"
         self.start_time = time.time()
-        self.target = target
 
-        incline_factor: float = (10 - incline) / 10
-        angle_target = math.pi / 2 + ((math.pi / 2) * incline_factor)
-
-        self.motion_x = 10 * math.cos(angle_target)
-        if self.facing == Facing.EAST:  # /summon MobMortar 3000 overworld
-            self.motion_x *= -1
-
-        print("dist", get_dist(author, self.target), author.x, self.target.x, max(author.x, self.target.x), min(author.x, self.target.x))
-        self.deceleration = 0.1
-
-    def activity(self):
-        super().activity()
-        if self.y + self.height + self.gravity_value < get_client().get_screen().get_height() - self.world.floor:
+    def activity(self) -> None:
+        """Activity of the mortar bullet."""
+        self.do_damage()
+        # If the mortar bullet is not on the floor and its next y position is not on the floor, it goes down
+        if eval(self.formula.replace("x", str(self.x-self.start_x + self.motion_x))) < get_client().get_screen().get_height() - self.world.floor:
+            # X increases by 2 every tick (motion_x)
             self.x += self.motion_x
-            self.y += self.gravity_value
-            self.gravity_value += self.deceleration
-            self.gravity_value = max(min(self.gravity_value, 10), -10)
-
-        elif self.t >= 30:
-            self.death()
+            # Y is calculated with the formula (see above)
+            self.y = eval(self.formula.replace("x", str(self.x-self.start_x)))
         else:
-            self.t += 1
-
+            # If the mortar bullet goes to the floor, it will die faster
+            self.start_time -= 15
+            self.to_floor()
         if self.x > get_client().get_screen().get_width() * 5 or self.x + self.width < 0 - get_client().get_screen().get_width() * 5 or self.y > get_client().get_screen().get_height() * 5:
             self.death()
-        elif has_elapsed(self.start_time, 10):
+        elif has_elapsed(self.start_time, 20):
             self.death()
-
-        self.do_damage()
-
-    def to_json(self):
-        return {"x": self.x, "y": self.y, "world": self.world.name, "facing": self.facing.value, "uuid": str(self.uuid), "author_uuid": str(self.author.uuid)}
-
-    @staticmethod
-    def from_json(json_dict):
-        fb = Fireball(json_dict["x"], json_dict["y"], get_game().current_level.get_entity_by_uuid(json_dict["author_uuid"]))
-        fb.uuid = json_dict["uuid"]
-        fb.source = 1
-        return fb

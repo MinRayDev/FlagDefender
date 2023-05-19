@@ -49,8 +49,8 @@ class Game:
 
     """
     instance: Game = None
-    name: str = "UwU"
-    version: str = "0.0.1"
+    name: str = "Flag Defender"
+    version: str = "1"
 
     is_init: bool
     current_menu: Optional[Menu]
@@ -130,14 +130,23 @@ class Game:
         self.current_level = None
 
     def update_logic(self) -> None:
-        """Update Game's logic.
+        """
+        Update the game logic.
 
-            For each entity for each world the code calls its function 'activity' and for each player too.
-            Afterwards it will check if the round is finished.
+        This function is called every tick (every 1/60 secondes).
+        It calls the activity function of the current menu if it's not None and not an instance of GameMenu.
+        Else it calls the activity function of the current level.
 
+        When the current level is not None, it calls the activity function of each entity of each world of the current level.
+        Then it calls the activity function of each player of the current level.
+        Then it checks if the round is finished and if it is, it calls the next_round function of the round manager.
+        If the round is finished and the end_time is 0, it sets the end_time to the current time.
+        If the end_time is not 0 and 5 seconds has elapsed, it calls the next_round function of the round manager.
+
+        :return:
         """
         from ui.game_menu import GameMenu
-        from entities.livingentities.entity_player import PlayerEntity
+        from entities.livingentities.player_entity import PlayerEntity
         if self.current_menu is not None and not isinstance(self.current_menu, GameMenu):
             self.current_menu.activity()
         else:

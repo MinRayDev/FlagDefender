@@ -5,10 +5,12 @@ if TYPE_CHECKING:
 
 
 def get_game() -> 'Game':
+    """Returns the game instance."""
     from core.game import Game
     return Game.instance
 
 
 def get_client() -> 'Client':
+    """Returns the client instance."""
     from core.client import Client
     return Client.instance

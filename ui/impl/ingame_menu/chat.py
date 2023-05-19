@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 
 import pygame
 from pygame import Surface
@@ -12,9 +13,31 @@ from util.instance import get_game
 
 
 class ChatMenu(GameMenu):
+    """Class 'ChatMenu' is the chat menu of the game.
+
+        Extends the class 'GameMenu'.
+        :ivar text_input: The text input of the chat menu.
+        :type text_input: TextEntry.
+        :ivar init_time: The initial time of the chat menu.
+        :type init_time: int.
+        :ivar message_index: The index of the message.
+        :type message_index: int.
+        :ivar tab_index: The index of the tab.
+        :type tab_index: int.
+        :ivar to_complete: The text to complete.
+        :type to_complete: Optional[str].
+
+    """
+    text_input: TextEntry
+    init_time: float
+    message_index: int
+    tab_index: int
+    to_complete: Optional[str]
+
     def __init__(self):
+        """Constructor of the class 'ChatMenu'."""
         super().__init__("Chat Menu")
-        self.text_input = TextEntry('', 10, get_client().get_screen().get_height()-get_client().get_screen().get_height()//20 - 50, get_client().get_screen().get_width()/2.5, 50, (153, 170, 181))
+        self.text_input = TextEntry('', 10, get_client().get_screen().get_height()-get_client().get_screen().get_height()//20 - 50, int(get_client().get_screen().get_width()/2.5), 50, (153, 170, 181))
         self.text_input.background_color = None
         self.text_input.selected = True
         self.text_input.unselect = False
@@ -25,7 +48,8 @@ class ChatMenu(GameMenu):
         self.tab_index = 0
         self.to_complete = None
 
-    def activity(self):
+    def activity(self) -> None:
+        """Method to update the chat menu."""
         inputs = self.get_queue()
         if time.time() > self.init_time + 0.5:
             if pygame.K_RETURN in inputs.get_codes():
@@ -89,16 +113,33 @@ class ChatMenu(GameMenu):
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def draw(self, surface: Surface) -> None:
+        """Method to draw the chat menu.
+
+            :param surface: The surface on which the chat menu is drawn.
+            :type surface: Surface.
+
+        """
         self.alpha_draw(surface, (32, 32, 32, 163), self.text_input.rectangle)
         for elem in self.elems:
             elem.draw(surface)
 
     @classmethod
-    def alpha_draw(cls, surface, color, rect: pygame.Rect):
+    def alpha_draw(cls, surface: Surface, color_rgba: tuple[int, int, int, int], rect: pygame.Rect) -> None:
+        """Method to draw a rectangle with an alpha value.
+
+            :param surface: The surface on which the rectangle is drawn.
+            :type surface: Surface.
+            :param color_rgba: The color of the rectangle.
+            :type color_rgba: tuple[int, int, int, int].
+            :param rect: The rectangle to draw.
+            :type rect: pygame.Rect.
+
+        """
         temp_surface = pygame.Surface(rect.size, pygame.SRCALPHA)
-        pygame.draw.rect(temp_surface, color, temp_surface.get_rect())
+        pygame.draw.rect(temp_surface, color_rgba, temp_surface.get_rect())
         surface.blit(temp_surface, rect)
 
-    def reset_tab(self):
+    def reset_tab(self) -> None:
+        """Method to reset the tab index."""
         self.tab_index = 0
         self.to_complete = None

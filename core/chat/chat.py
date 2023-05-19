@@ -1,8 +1,7 @@
 import enum
 import time
-import traceback
 
-from core.ingame.item.item_type import ItemType
+
 from util.logger import log
 
 registered_entities = []
@@ -143,6 +142,7 @@ def item_complete(word: str, tab_index: int) -> str:
         :rtype: str.
 
     """
+    from core.ingame.item.item_type import ItemType
     return ItemType.get_name_start(word.lower(), tab_index)
 
 

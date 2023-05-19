@@ -140,7 +140,7 @@ class Level:
         """
         for world in self.worlds:
             for entity in world.entities:
-                if entity.uuid == uuid_:
+                if entity.uuid_ == uuid_:
                     return entity
 
     def is_morning(self) -> bool:
@@ -268,7 +268,7 @@ class Level:
                     else:
                         entity_ = class_(entity["x"], entity["y"], world)
                         entity_.health = entity["health"]
-                    entity_.uuid = uuid.UUID(str(entity["uuid"]))
+                    entity_.uuid_ = uuid.UUID(str(entity["uuid"]))
                     level.round_manager.round_.mobs.append(entity_)
                 if world_name == "overworld":
                     from core.ingame.backgrounds.overworld_background import OverworldBackground

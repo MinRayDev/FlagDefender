@@ -4,17 +4,15 @@ import uuid
 from typing import TYPE_CHECKING
 
 import pygame
-from pygame.event import Event
+from pygame.event import EventType
 
 from core.ingame.item.inventory import Inventory
-from core.ingame.item.item_type import ItemType
-
-from entities.livingentities.entity_player import PlayerEntity
-
+from entities.livingentities.player_entity import PlayerEntity
 from util.input.controls import ControlsEventTypes, Controls
 from util.instance import get_game, get_client
 from util.time_util import has_elapsed
 from util.world_util import teleport_level
+
 if TYPE_CHECKING:
     from core.client import Client
     from core.level import Level
@@ -54,7 +52,7 @@ class Player:
     cooldowns: dict[object, float]
     death: int
     keys: list[int]
-    events: list[Event]
+    events: list[EventType]
 
     def __init__(self, controller: 'Controller', world: 'World'):
         """Constructor function for Player class.
@@ -65,6 +63,7 @@ class Player:
             :type world: World.
 
         """
+        from core.ingame.item.item_type import ItemType
         self.client = get_client()
         self.entity = PlayerEntity(0, 0, world)
         self.controller = controller
@@ -78,11 +77,11 @@ class Player:
         self.keys = []
         self.events = []
 
-    def get_controls(self, events: list[Event]) -> None:
+    def get_controls(self, events: list[EventType]) -> None:
         """Load controls from pygame's events.
 
             :param events: Pygame's events.
-            :type events: list[Event]
+            :type events: list[EventType]
 
         """
         for control in self.controller.get_active_controls(pygame.key.get_pressed()):
@@ -199,6 +198,7 @@ class Player:
             :rtype: Player.
 
         """
+        from core.ingame.item.item_type import ItemType
         player: Player = level.main_player
         player.user_id = uuid.UUID(json_dict["players"][player_uuid]["user_id"])
         player.kills = json_dict["players"][player_uuid]["kills"]
@@ -207,5 +207,5 @@ class Player:
             player.inventory.add_item(ItemType.get_by_id(int(item_id)), json_dict["players"][player_uuid]["inventory"][item_id])
         teleport_level(level, player.entity, level.get_world_by_name(json_dict["players"][player_uuid]["entity"]["world"]), json_dict["players"][player_uuid]["entity"]["x"])
         player.entity.facing = json_dict["players"][player_uuid]["entity"]["facing"]
-        player.entity.uuid = uuid.UUID(json_dict["players"][player_uuid]["entity"]["uuid"]).hex
+        player.entity.uuid_ = uuid.UUID(json_dict["players"][player_uuid]["entity"]["uuid"]).hex
         return player

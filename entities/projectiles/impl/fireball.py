@@ -8,7 +8,29 @@ from util.instance import get_client
 
 
 class Fireball(Projectile):
+    """Class 'Fireball'.
+
+        Extends 'Projectile'.
+        :ivar frame: The current frame of the fireball.
+        :type frame: int.
+        :ivar start_x: The x position of the fireball when it was created.
+        :type start_x: int.
+
+    """
+    frame: int
+    start_x: int
+
     def __init__(self, x: int, y: int, author: Entity):
+        """Constructor of the class 'Fireball'.
+
+            :param x: The x position of the fireball.
+            :type x: int.
+            :param y: The y position of the fireball.
+            :type y: int.
+            :param author: The author of the fireball.
+            :type author: Entity.
+
+        """
         super().__init__(x, y, sprites_path=r"./resources/sprites/projectiles/fireball", author=author, damage_value=20)
         self.frame = 0
         self.start_x = x
@@ -31,6 +53,12 @@ class Fireball(Projectile):
                 self.y += 20
 
     def draw(self, surface: Surface) -> None:
+        """Draws the fireball.
+
+            :param surface: The surface to draw the fireball on.
+            :type surface: Surface.
+
+        """
         if round(self.frame) < len(self.sprites):
             draw_with_scroll(surface, list(self.sprites.values())[round(self.frame)], self.x, self.y)
         else:
@@ -38,8 +66,11 @@ class Fireball(Projectile):
             draw_with_scroll(surface, list(self.sprites.values())[self.frame], self.x, self.y)
         self.frame += 0.2
 
-    def activity(self):
+    def activity(self) -> None:
+        """The activity of the fireball."""
         super().activity()
+        if self.health <= 0:
+            self.death()
         self.x += self.motion_x
         self.y += self.motion_y
 

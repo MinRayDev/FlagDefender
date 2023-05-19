@@ -6,7 +6,6 @@ from pygame import Surface
 from core.ingame.backgrounds.elements.tree_elements.branch import Branch
 from core.ingame.backgrounds.elements.tree_elements.tree_element import TreeElement
 from core.world import Facing
-from util.logger import log
 from util.sprites import load
 
 

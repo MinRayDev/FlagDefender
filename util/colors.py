@@ -4,6 +4,7 @@ from catppuccin import Flavour
 
 
 class Colors(tuple[int, int, int], enum.Enum):
+    """Class 'Colors'."""
     white = (255, 255, 255)
     red = Flavour.frappe().red.rgb
     text_color = Flavour.frappe().pink.rgb

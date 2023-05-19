@@ -10,19 +10,54 @@ from ui.element.impl.text import Text
 
 from ui.menu import Menu
 from util.colors import Colors
-from util.instance import get_game
+from util.instance import get_game, get_client
 
 
 class SettingsBaseMenu(Menu):
-    def __init__(self, parent):
+    """Class 'SettingsBaseMenu' is the base menu of the settings menu.
+
+        Extends the class 'Menu'.
+        :ivar rect_split: The rectangle that splits the menu.
+        :type rect_split: Rectangle.
+        :ivar general_button: The button to go to the general settings menu.
+        :type general_button: ButtonText.
+        :ivar control_button: The button to go to the control settings menu.
+        :type control_button: ButtonText.
+        :ivar back_button: The button to go back to the previous menu.
+        :type back_button: ButtonText.
+        :ivar selected: The button that is selected.
+        :type selected: ButtonText.
+        :ivar rect_split_2: The rectangle that splits the menu.
+        :type rect_split_2: Rectangle.
+        :ivar client_id_text: The text that shows the client id.
+        :type client_id_text: Text.
+        :ivar game_version_text: The text that shows the game version.
+        :type game_version_text: Text.
+
+    """
+    rect_split: Rectangle
+    general_button: ButtonText
+    control_button: ButtonText
+    back_button: ButtonText
+    selected: ButtonText
+    rect_split_2: Rectangle
+    client_id_text: Text
+    game_version_text: Text
+
+    def __init__(self, parent: Menu):
+        """Constructor of the class 'SettingsBaseMenu'.
+
+            :param parent: The previous menu.
+            :type parent: Menu.
+
+        """
         from ui.impl.settings.controls_settings import ControlSettingsMenu
         from ui.impl.settings.general_settings import GeneralSettingsMenu
-        from util.instance import get_client
-        super().__init__("Main Menu", parent)
-        self.client = get_client()
 
-        width_base = get_client().get_screen().get_width() // 10
-        height_base = get_client().get_screen().get_height() // 17
+        super().__init__("Main Menu", parent)
+
+        width_base: int = get_client().get_screen().get_width() // 10
+        height_base: int = get_client().get_screen().get_height() // 17
         self.rect_split = Rectangle(get_client().get_screen().get_width() // 40,
                                     get_client().get_screen().get_height() // 75 + height_base,
                                     get_client().get_screen().get_width() - 2 * (
@@ -65,7 +100,8 @@ class SettingsBaseMenu(Menu):
         self.game_version_text.rectangle.x = get_client().get_screen().get_width() - get_client().get_screen().get_width() // 30 - self.game_version_text.rectangle.width
         self.elems = [self.general_button, self.control_button, self.back_button, self.rect_split, self.rect_split_2, self.client_id_text, self.game_version_text]
 
-    def activity(self):
+    def activity(self) -> None:
+        """Activity of the menu."""
         super().activity()
         inputs = self.get_queue()
         for elem in self.elems:
@@ -87,6 +123,12 @@ class SettingsBaseMenu(Menu):
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def draw(self, surface: Surface) -> None:
+        """Draws the menu.
+
+            :param surface: The surface to draw on.
+            :type surface: Surface.
+
+        """
         pygame.draw.rect(surface, Colors.base_color,
-                         pygame.Rect(0, 0, self.client.get_screen().get_width(), self.client.get_screen().get_height()))
+                         pygame.Rect(0, 0, get_client().get_screen().get_width(), get_client().get_screen().get_height()))
         super().draw(surface)

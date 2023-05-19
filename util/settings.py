@@ -1,9 +1,15 @@
 import json
-import os
+
 from util.input.controls import Controls
 
 
 def write_settings(fp: str) -> None:
+    """Writes the settings to the given file path.
+
+        :param fp: The file path to write the settings to.
+        :type fp: str.
+
+    """
     settings_dict = {}
     for control in Controls:
         settings_dict[control.name] = control.value
@@ -11,6 +17,12 @@ def write_settings(fp: str) -> None:
 
 
 def load_settings(fp: str) -> None:
+    """Loads the settings from the given file path.
+
+        :param fp: The file path to load the settings from.
+        :type fp: str.
+
+    """
     with open(fp, "r") as file:
         try:
             settings_dict = json.load(file)

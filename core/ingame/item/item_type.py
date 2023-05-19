@@ -4,6 +4,7 @@ import enum
 from typing import Optional, Callable, Generator, Any
 from pygame import Surface
 
+from core.ingame.item.item import ItemUsage
 from util.sprites import load
 
 
@@ -14,11 +15,11 @@ class ItemType(enum.Enum):
 
     """
     magical_essence = {"id": 0, "sprites_path": r"./resources/sprites/items/magical_essence", "stack_limit": 128, "name": "MagicalEssence", "usage": None}
-    wall = {"id": 2, "sprites_path": r"./resources/sprites/items/wall", "stack_limit": 16, "name": "Wall", "usage": "ItemUsage.wall_use"}
-    big_wall = {"id": 3, "sprites_path": r"./resources/sprites/items/big_wall", "stack_limit": 16, "name": "BigWall", "usage": "ItemUsage.big_wall_use"}
-    turret = {"id": 4, "sprites_path": r"./resources/sprites/items/turret", "stack_limit": 16, "name": "Turret", "usage": "ItemUsage.turret_use"}
-    kill_all = {"id": 5, "sprites_path": r"./resources/sprites/items/kill_all", "stack_limit": 16, "name": "KillAll", "usage": "ItemUsage.kill_all"}
-    tp_all = {"id": 6, "sprites_path": r"./resources/sprites/items/tp_all", "stack_limit": 16, "name": "TpAll", "usage": "ItemUsage.tp_all"}
+    wall = {"id": 2, "sprites_path": r"./resources/sprites/items/wall", "stack_limit": 16, "name": "Wall", "usage": ItemUsage.wall_use}
+    big_wall = {"id": 3, "sprites_path": r"./resources/sprites/items/big_wall", "stack_limit": 16, "name": "BigWall", "usage": ItemUsage.big_wall_use}
+    turret = {"id": 4, "sprites_path": r"./resources/sprites/items/turret", "stack_limit": 16, "name": "Turret", "usage": ItemUsage.turret_use}
+    kill_all = {"id": 5, "sprites_path": r"./resources/sprites/items/kill_all", "stack_limit": 16, "name": "KillAll", "usage": ItemUsage.kill_all}
+    tp_all = {"id": 6, "sprites_path": r"./resources/sprites/items/tp_all", "stack_limit": 16, "name": "TpAll", "usage": ItemUsage.tp_all}
 
     def get_sprites(self) -> dict[str, Surface]:
         """Loads item's sprites.
@@ -83,7 +84,7 @@ class ItemType(enum.Enum):
         """
         return self.value["usage"] is not None
 
-    def get_usage(self) -> Optional[str]:
+    def get_usage(self) -> Optional[Callable]:
         """Get item usage.
 
             :return: Item usage class and function.

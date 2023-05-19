@@ -1,4 +1,6 @@
-from core.ingame.item.item_type import ItemType
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from core.ingame.item.item_type import ItemType
 
 
 class Inventory:
@@ -8,7 +10,7 @@ class Inventory:
         :type content: dict[ItemType, int].
 
     """
-    content: dict[ItemType, int]
+    content: dict['ItemType', int]
 
     def __init__(self):
         """Constructor function for Inventory class."""
@@ -17,7 +19,7 @@ class Inventory:
     def __len__(self) -> int:
         return len(self.content.keys())
 
-    def add_item(self, item: ItemType, count: int = 1) -> bool:
+    def add_item(self, item: 'ItemType', count: int = 1) -> bool:
         """Add item in the inventory.
 
             :param item: Item to add.
@@ -38,7 +40,7 @@ class Inventory:
         else:
             return False
 
-    def remove_item(self, item: ItemType, count: int) -> None:
+    def remove_item(self, item: 'ItemType', count: int) -> None:
         """Remove item in the inventory.
 
             :param item: Item to remove.
@@ -52,7 +54,7 @@ class Inventory:
         if self.get_item_count(item) == 0:
             self.content.pop(item)
 
-    def has_item(self, item_type: ItemType) -> bool:
+    def has_item(self, item_type: 'ItemType') -> bool:
         """Check if inventory has item_type.
 
             :param item_type: Item to check.
@@ -67,7 +69,7 @@ class Inventory:
                 return True
         return False
 
-    def get_item_count(self, item_type: ItemType) -> int:
+    def get_item_count(self, item_type: 'ItemType') -> int:
         """Get number of item_type.
 
             :param item_type: Item to check.
@@ -82,7 +84,7 @@ class Inventory:
                 return self.content[item]
         return 0
 
-    def get_index(self, index: int) -> ItemType:
+    def get_index(self, index: int) -> 'ItemType':
         """Get 'ItemType' by 'index'.
 
             :param index: Index to get.
@@ -94,7 +96,7 @@ class Inventory:
         """
         return list(self.content.keys())[index]
 
-    def can_add_item(self, item: ItemType, count: int) -> bool:
+    def can_add_item(self, item: 'ItemType', count: int) -> bool:
         """Check if an item can be added in the inventory.
 
             :param item: ItemType to check.

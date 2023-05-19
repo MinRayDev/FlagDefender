@@ -68,7 +68,7 @@ class World:
             :rtype: bool.
 
         """
-        from entities.livingentities.entity_player import PlayerEntity
+        from entities.livingentities.player_entity import PlayerEntity
         for entity in self.entities:
             if isinstance(entity, PlayerEntity):
                 return True
@@ -92,7 +92,7 @@ class World:
         """
         world = {"entities": []}
         from entities.entity import Entity
-        from entities.livingentities.entity_player import PlayerEntity
+        from entities.livingentities.player_entity import PlayerEntity
         from entities.projectiles.projectile import Projectile
         from entities.world_objects.entity_mountain import Mountain
         from entities.world_objects.flag import Flag

@@ -97,22 +97,18 @@ class Round:
                             count += 1
                     if round((count/mob_count)*100, 0) <= mob[1]:
                         break
-            if random.randint(0, 1):
-                log("Left selected", '\33[0;31m')
-                # left
+            if random.randint(0, 1) or mob[0] == MobMortar:
+                # Left world
                 if hells[0].has_player():
                     entity = summon_mob(mob[0], -2000, hells[0])
-                    log("Entity: " + str(entity), '\33[0;31m')
                     self.mobs.append(entity)
                 else:
                     entity = summon_mob(mob[0], -9000, game_instance.get_world_by_name("overworld"))
-                    log("Entity: " + str(entity), '\33[0;31m')
                     self.mobs.append(entity)
             else:
-                log("Right selected", '\33[0;31m')
+                # Right world
                 if hells[1].has_player():
                     entity = summon_mob(mob[0], 0, hells[1])
-                    log("Entity: " + str(entity), '\33[0;31m')
                     self.mobs.append(entity)
                 else:
                     entity = summon_mob(mob[0], 9000, game_instance.get_world_by_name("overworld"))
@@ -150,8 +146,8 @@ class RoundManager:
         self.round_ = Round(1)
         self.__level = level
         self.can_summon = summon
-        # if summon:
-        #     self.round_.generate_mobs(level)
+        if summon:
+            self.round_.generate_mobs(level)
 
         self.passed_rounds = []
 
@@ -159,7 +155,7 @@ class RoundManager:
         """Change the round and spawn new monsters."""
         self.passed_rounds.append(self.round_)
         self.round_ = Round(self.round_.number + 1)
-        # self.round_.generate_mobs(self.__level)
+        self.round_.generate_mobs(self.__level)
 
     def start(self) -> None:
         """Allows the round manager to spawn monsters."""

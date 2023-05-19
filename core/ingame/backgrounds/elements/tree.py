@@ -10,7 +10,6 @@ from core.ingame.backgrounds.elements.tree_elements.body import Body
 from core.ingame.backgrounds.elements.tree_elements.foot import Foot
 from core.ingame.backgrounds.elements.tree_elements.head import Head
 from core.world import Facing
-from util.logger import log
 
 
 class Tree:
@@ -59,7 +58,6 @@ class Tree:
         self.surface = None
 
         if not loading:
-            log("Creating tree.")
             self.multiplier = random.randint(25, 45) / 10
 
             self.is_dead = random.randint(0, 100) > 70

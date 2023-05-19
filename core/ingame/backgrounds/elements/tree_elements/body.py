@@ -10,7 +10,6 @@ from core.ingame.backgrounds.elements.tree_elements.branch import Branch
 from core.ingame.backgrounds.elements.tree_elements.tree_element import TreeElement
 from core.ingame.backgrounds.elements.tree_elements.trunk import Trunk
 from core.world import Facing
-from util.logger import log
 
 
 class Body(TreeElement):
@@ -72,8 +71,9 @@ class Body(TreeElement):
         if self.size > 20:
             self.branch_prop = 30
         branch_prop_check: bool = False
+        ultimate_tree: int = random.randint(0, 1000)
         for i in range(self.size):
-            if random.randint(0, 40) > self.branch_prop or i < 2 or i >= self.size - 1 or (branch_prop_check and random.randint(0, 100) > 33):
+            if (random.randint(0, 40) > self.branch_prop or i < 2 or i >= self.size - 1 or (branch_prop_check and random.randint(0, 100) > 33)) and ultimate_tree != 0:
                 self.components.append(Trunk([], self.is_dead, multiplier))
                 branch_prop_check = False
             else:
@@ -107,7 +107,6 @@ class Body(TreeElement):
         self.real_height = 0
         width: int = max(self.get_widths())
         height: int = int(sum(self.get_heights())*1)
-        log("Body height: " + str(height))
         surface: Surface = Surface((width, height), pygame.SRCALPHA)
         y = 0
         for i, component in enumerate(self.components):

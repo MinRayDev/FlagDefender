@@ -4,8 +4,7 @@ import os
 import shutil
 import threading
 import time
-import traceback
-from typing import Optional
+from typing import Optional, Any
 
 import pygame
 from pygame import Surface
@@ -27,25 +26,45 @@ from util.menu import add_check
 
 
 def load_and_set_level(name: str, json_fp: str, menu: WorldMenu) -> bool:
+    """Load and set the current level.
+
+        :param name: The name of the level.
+        :type name: str.
+        :param json_fp: The path of the level.
+        :type json_fp: str.
+        :param menu: The world menu.
+        :type menu: WorldMenu.
+
+        :return: True if the level has been loaded and set, False otherwise.
+        :rtype: bool.
+
+    """
     try:
         get_game().set_level(Level.load(name, json_fp))
-    except Exception:
-        print("AAAAAAAAAAAAAAAAAA3")
-        traceback.print_exc()
+    except:
         warn(menu, "Error loading world.")
     return True
 
 
-def create_new_level(name: str, parent, new_world_menu):
-    level = Level(name)
+def create_new_level(name: str, parent, new_world_menu) -> None:
+    """Create a new level and save it.
+
+        :param name: The name of the level.
+        :type name: str.
+        :param parent: The parent menu.
+        :type parent: WorldMenu.
+        :param new_world_menu: The new world menu.
+        :type new_world_menu: CreateNewWorld.
+
+    """
+    level: Level = Level(name)
     level.save()
-    add_check("Level saved.", __name__ + "Level.init")
+    add_check("Level saved.", __name__ + "create_new_level")
 
     parent.saves = {}
     for i, save in enumerate(files.get_saves()):
         if save.endswith(".json"):
             new_world_menu.parent.saves[save.split("\\")[-1][:-5]] = save
-    # fin loading
     parent.new_creation = False
     del parent.elems[parent.elems.index(new_world_menu)]
     parent.reload()
@@ -54,7 +73,38 @@ def create_new_level(name: str, parent, new_world_menu):
 
 
 class CreateNewWorld(Element):
+    """Class 'CreateNewWorld' is an element to create a new world.
+
+            Extends 'Element'.
+            :ivar parent: The parent menu.
+            :type parent: WorldMenu.
+            :ivar s_width: The width of the screen.
+            :type s_width: int.
+            :ivar s_height: The height of the screen.
+            :type s_height: int.
+            :ivar rect: The rectangle.
+            :type rect: Rectangle.
+            :ivar text_entry: The text entry.
+            :type text_entry: TextEntry.
+            :ivar intern_elems: The internal elements.
+            :type intern_elems: list[Element].
+
+
+    """
+    parent: WorldMenu
+    s_width: int
+    s_height: int
+    rect: Rectangle
+    text_entry: TextEntry
+    intern_elems: list[Element]
+
     def __init__(self, parent: WorldMenu):
+        """Constructor of the class 'CreateNewWorld'.
+
+            :param parent: The parent menu.
+            :type parent: WorldMenu.
+
+        """
         self.parent = parent
         self.s_width, self.s_height = get_client().instance.get_screen().get_width(), get_client().instance.get_screen().get_height()
         super().__init__("CENTER", "CENTER", self.s_width // 3, self.s_height // 6)
@@ -67,6 +117,12 @@ class CreateNewWorld(Element):
         self.intern_elems: list[Element] = [self.rect, self.text_entry]
 
     def activity(self, inputs: Inputs) -> None:
+        """Activity of the element.
+
+            :param inputs: The inputs.
+            :type inputs: Inputs.
+
+        """
         if pygame.K_ESCAPE in inputs.get_codes():
             if self in self.parent.elems:
                 self.parent.new_creation = False
@@ -77,6 +133,8 @@ class CreateNewWorld(Element):
                 f = open(os.path.join(files.get_save_path(), self.text_entry.text + ".json"), "x")
                 f.close()
                 get_game().set_menu(LoadingMenu(self.parent, 32, "Initiating game.", after=lambda: get_game().set_menu(self.parent)))
+                # A thead is used to avoid the game to freeze while loading the level
+                # A daemon thread is used to avoid the thread to prevent the program from closing.
                 threading.Thread(target=create_new_level, args=(self.text_entry.text, self.parent, self), daemon=True).start()
                 return
             except OSError:
@@ -89,10 +147,12 @@ class CreateNewWorld(Element):
             elem.activity(inputs)
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Draw the element."""
         for elem in self.intern_elems:
             elem.draw(surface)
 
     def hover(self) -> None:
+        """Function called when the mouse is over the element."""
         for elem in self.intern_elems:
             if elem.hover() is not None and get_game().current_menu is not None and not isinstance(elem, Rectangle):
                 if pygame.mouse.get_cursor() != elem.hover():
@@ -103,7 +163,43 @@ class CreateNewWorld(Element):
 
 
 class WorldMenu(Menu):
-    def __init__(self, prev):
+    """Class 'WorldMenu' is the menu to load a world.
+
+        Extends 'Menu'.
+        :ivar base_color: The base color.
+        :type base_color: tuple[int, int, int].
+        :ivar button_base_color: The button base color.
+        :type button_base_color: tuple[int, int, int].
+        :ivar button_hover_color: The button hover color.
+        :type button_hover_color: tuple[int, int, int].
+        :ivar text_color: The text color.
+        :type text_color: tuple[int, int, int].
+        :ivar selected_button: The selected button.
+        :type selected_button: Optional[ButtonText].
+        :ivar sp: The scroll pane.
+        :type sp: ScrollPane.
+        :ivar saves: The saves.
+        :type saves: dict[str, dict[str, Any]].
+        :ivar new_creation: If a new world is being created.
+        :type new_creation: bool.
+
+    """
+    base_color: tuple[int, int, int]
+    button_base_color: tuple[int, int, int]
+    button_hover_color: tuple[int, int, int]
+    text_color: tuple[int, int, int]
+    selected_button: Optional[ButtonText]
+    sp: ScrollPane
+    saves: dict[str, str]
+    new_creation: bool
+
+    def __init__(self, prev: Menu):
+        """Constructor of the class 'WorldMenu'.
+
+            :param prev: The previous menu.
+            :type prev: Menu.
+
+        """
         super().__init__("World Menu", prev)
         self.base_color = Colors.base_color
         self.button_base_color = Colors.button_base_color
@@ -121,15 +217,15 @@ class WorldMenu(Menu):
                                 self.button_hover_color)
                 self.saves[save.split("\\")[-1][:-5]] = save
                 self.sp.elems.append(bt)
-        elem0 = Rectangle(0, get_client().get_screen().get_height() - 190, get_client().get_screen().get_width(), 190,
-                          Colors.mantle)
-        elem1 = Rectangle(0, 0, get_client().get_screen().get_width(), 10, self.base_color)
-        elem2 = Rectangle(0, 0, 10, self.sp.height + self.sp.y, self.base_color)
-        elem3 = Rectangle(self.sp.width + self.sp.x, 0, 10, self.sp.height + self.sp.y, self.base_color)
-        base_x = get_client().get_screen().get_width() // 7
-        base_y = get_client().get_screen().get_height() - get_client().get_screen().get_height() // 6
-        width = ((get_client().get_screen().get_width() - (get_client().get_screen().get_width() // 7) * 2) // 2) - 10
-        height = get_client().get_screen().get_height() // 15
+        elem0: Rectangle = Rectangle(0, get_client().get_screen().get_height() - 190, get_client().get_screen().get_width(), 190,
+                                     Colors.mantle)
+        elem1: Rectangle = Rectangle(0, 0, get_client().get_screen().get_width(), 10, self.base_color)
+        elem2: Rectangle = Rectangle(0, 0, 10, self.sp.height + self.sp.y, self.base_color)
+        elem3: Rectangle = Rectangle(self.sp.width + self.sp.x, 0, 10, self.sp.height + self.sp.y, self.base_color)
+        base_x: int = get_client().get_screen().get_width() // 7
+        base_y: int = get_client().get_screen().get_height() - get_client().get_screen().get_height() // 6
+        width: int = ((get_client().get_screen().get_width() - (get_client().get_screen().get_width() // 7) * 2) // 2) - 10
+        height: int = get_client().get_screen().get_height() // 15
         self.new_button = ButtonText(base_x, base_y, width, height, "New", self.button_base_color, self.text_color,
                                      self.button_hover_color)
         self.new_button.click = self.new
@@ -146,7 +242,8 @@ class WorldMenu(Menu):
                        self.back_button]
         self.new_creation: bool = False
 
-    def activity(self):
+    def activity(self) -> None:
+        """Activity of the menu."""
         if not self.new_creation:
             super().activity()
         inputs = self.get_queue()
@@ -168,6 +265,8 @@ class WorldMenu(Menu):
                     if elem.has_been_clicked and self.selected_button != elem:
                         self.selected_button = elem
                     elif elem.has_been_clicked and self.selected_button == elem:
+                        # A thread is used to load the level in the background
+                        # A daemon thread is used to avoid the thread to prevent the program from closing.
                         get_game().set_menu(LoadingMenu(self, 36, "Initiating game."))
                         threading.Thread(target=load_and_set_level,
                                          args=(elem.text_content, self.saves[elem.text_content], self),
@@ -182,6 +281,12 @@ class WorldMenu(Menu):
                     elem.hover()
 
     def draw(self, surface: Surface) -> None:
+        """Draw the menu.
+
+            :param surface: The surface on which the menu is drawn.
+            :type surface: Surface.
+
+        """
         for elem in self.elems:
             if self.new_creation:
                 elem.is_hover = False
@@ -191,24 +296,27 @@ class WorldMenu(Menu):
                     if self.new_creation:
                         child.is_hover = False
                     if self.selected_button == child and isinstance(child, ButtonText) and self.new_creation is False:
-                        pygame.draw.rect(surface, Colors.surface1,
+                        pygame.draw.rect(surface, Colors.surface2,
                                          pygame.Rect(child.x - 4, child.y - 4, child.width + 8, child.height + 8))
                         child.draw(surface)
 
-    def delete(self):
+    def delete(self) -> None:
+        """Delete the selected save."""
         if self.selected_button is not None and os.path.exists(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json")):
             os.remove(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json"))
             info(self, f"The save '{self.selected_button.text_content}' has been successfully deleted.")
         self.reload()
 
-    def duplicate(self):
+    def duplicate(self) -> None:
+        """Duplicate the selected save."""
         if self.selected_button is not None:
             shutil.copyfile(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json"),
                             os.path.join(files.get_save_path(), self.selected_button.text_content + " - Copy.json"))
             info(self, f"The save '{self.selected_button.text_content}' has been successfully duplicated.")
         self.reload()
 
-    def reload(self):
+    def reload(self) -> None:
+        """Reload the saves."""
         self.sp.elems.clear()
         for i, save in enumerate(files.get_saves()):
             if save.endswith(".json"):
@@ -218,7 +326,8 @@ class WorldMenu(Menu):
                                 self.button_hover_color)
                 self.sp.elems.append(bt)
 
-    def new(self):
+    def new(self) -> None:
+        """Create a new save."""
         self.new_creation = True
         self.elems.append(CreateNewWorld(self))
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
