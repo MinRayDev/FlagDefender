@@ -47,22 +47,25 @@ class MortarBullet(Fireball):
         self.motion_x = 2
         self.facing = author.facing
         if self.facing == Facing.WEST:
-            self.dist_base = abs(self.x - target.x)
             self.x = author.x - self.width - 2
+            self.dist_base = abs(self.x - target.x)
             self.motion_x = -2
         else:
-            self.dist_base = abs(self.x - target.x)
             self.x = author.x + author.width + 2
+            self.dist_base = abs(self.x - target.x)
         self.start_x = self.x
 
-        # Formula: (1/65)*x**2 - (dist_base/65)*x + start_y
+        # Formula: (1/50)*x**2 - (dist_base/65)*x + start_y
         # 1/65 so the parabola is not too high
-        # dist_base/65 so the parabola is not too long (dist_base is the distance between the mortar bullet (at the start) and the target)
+        # dist_base/50 so the parabola is not too long (dist_base is the distance between the mortar bullet (at the start) and the target)
         # start_y so the parabola starts at the right height
         self.formula = f"(1/65)*x**2 - ({self.dist_base}/65)*x + {self.start_y}"
+        log(target)
+        print(self.formula)
         self.start_time = time.time()
 
     def activity(self) -> None:
+
         """Activity of the mortar bullet."""
         self.do_damage()
         # If the mortar bullet is not on the floor and its next y position is not on the floor, it goes down
