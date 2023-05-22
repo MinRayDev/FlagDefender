@@ -38,4 +38,4 @@ class HUD(GameMenu):
         pygame.draw.rect(surface, Colors.red, pygame.Rect(self.health_rect_base.x, self.height - self.height//30 - self.height//50, int((self.width//8)*health_percentage), self.height//30))
         Text("Kills: " + str(get_game().current_level.main_player.kills), self.width-self.width//8, self.height//20, Colors.red).draw(surface)
         Text("Round: " + str(get_game().current_level.round_manager.round_.number), self.width - self.width // 8, self.height // 10, Colors.red).draw(surface)
-        Text("Incline: " + str(get_game().current_level.main_player.entity.incline), self.width - self.width // 8, self.height // 8, Colors.red).draw(surface)
+        Text("Incline: " + str(get_game().current_level.main_player.entity.incline), self.width - self.width // 8, self.height // 7, Colors.red).draw(surface)

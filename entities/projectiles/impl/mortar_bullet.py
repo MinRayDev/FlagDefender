@@ -3,8 +3,8 @@ import time
 from core.world import Facing
 from entities.entity import Entity
 from entities.projectiles.impl.fireball import Fireball
-from util.instance import get_game, get_client
-from util.logger import log, LogColors
+from util.instance import get_client
+from util.logger import log
 from util.time_util import has_elapsed
 
 

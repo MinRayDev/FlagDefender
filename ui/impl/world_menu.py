@@ -310,9 +310,13 @@ class WorldMenu(Menu):
     def duplicate(self) -> None:
         """Duplicate the selected save."""
         if self.selected_button is not None:
-            shutil.copyfile(os.path.join(files.get_save_path(), self.selected_button.text_content + ".json"),
-                            os.path.join(files.get_save_path(), self.selected_button.text_content + " - Copy.json"))
+            text: str = os.path.join(files.get_save_path(), self.selected_button.text_content)
+            shutil.copyfile(text + ".json",
+                            text + " - Copy.json")
+            self.saves[(text + " - Copy.json").split("\\")[-1][:-5]] = text + " - Copy.json"
+            print(self.saves)
             info(self, f"The save '{self.selected_button.text_content}' has been successfully duplicated.")
+
         self.reload()
 
     def reload(self) -> None:
