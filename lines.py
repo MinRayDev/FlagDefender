@@ -13,7 +13,7 @@ def add(path):
         elif "." not in file and "venv" not in file:
             files += 1
             add(os.path.join(path, file))
-        elif "venv" not in file:
+        elif "." not in file:
             files += 1
 
 
