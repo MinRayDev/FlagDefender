@@ -2,7 +2,7 @@
 
 This game is a project for school. It was imperative to implement parabolic trajectories
 
-# Dependencies
+## Dependencies
 
 - Python 3.10
 - ![PyPI](https://img.shields.io/pypi/v/pygame.svg?label=pygame)
